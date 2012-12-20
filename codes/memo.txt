@@ -1,0 +1,3 @@
+all_xo の__DATA_NUM
+slave malloc の__DATA_NUM
+comm_size<3のときの計算順序
