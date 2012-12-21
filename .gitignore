@@ -1,1 +1,10 @@
-*.out
+.project
+.DS_Store
+.metadata
+.buildpath
+.settings
+.tags
+.git*
+.classpath
+mpi.c
+mpi.exe
