@@ -2,7 +2,6 @@
 #include<stdlib.h>
 #include<math.h>
 #include"mpi.h"
-#include <time.h>
 #define __DATA_NUM 1024
 #define MASTER 0
 
@@ -11,8 +10,7 @@ int main ( int argc , char** argv ) ;
 
 int main ( int argc , char** argv ) {
 
-    clock_t t1, t2;
-    t1 = clock();
+    double t1, t2;
     int start;
     int end;
     int __i;
@@ -36,6 +34,7 @@ int main ( int argc , char** argv ) {
     double t;
     double d = 0.010000;
     double* all_xo;
+    double* tmp_xo;
     double end_time = 400.000000;
     int comm_size;
     int node;
@@ -48,6 +47,7 @@ int main ( int argc , char** argv ) {
     MPI_Init ( &argc , &argv ) ;
     MPI_Comm_size ( MPI_COMM_WORLD , &comm_size ) ;
     MPI_Comm_rank ( MPI_COMM_WORLD , &node ) ;
+    t1 = MPI_Wtime();
     if( ( comm_size < 3 ) ){
 
         __MASTER_DATA_NUM =  ( __DATA_NUM / comm_size ) ;
@@ -74,6 +74,7 @@ int main ( int argc , char** argv ) {
         x4 = (double*)malloc (  ( sizeof( double ) *  ( 8 * __MASTER_DATA_NUM )  )  ) ;;
         x5 = (double*)malloc (  ( sizeof( double ) *  ( 8 * __MASTER_DATA_NUM )  )  ) ;;
         all_xo = (double*)malloc (  ( sizeof( double ) *  ( 8 * __DATA_NUM )  )  ) ;;
+        tmp_xo = (double*)malloc( (sizeof(double) * (8*__WORKER_DATA_NUM)));
         y1 = (double*)malloc (  ( sizeof( double ) *  ( 31 * __MASTER_DATA_NUM )  )  ) ;;
         y2 = (double*)malloc (  ( sizeof( double ) *  ( 31 * __MASTER_DATA_NUM )  )  ) ;;
         y3 = (double*)malloc (  ( sizeof( double ) *  ( 31 * __MASTER_DATA_NUM )  )  ) ;;
@@ -342,15 +343,14 @@ int main ( int argc , char** argv ) {
             }
 
             for(worker = 1; ( worker < comm_size ) ;worker++){
-
-                MPI_Recv ( &all_xo[ (  (  ( 0 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 1 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 2 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 3 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 4 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 5 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 6 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
-                MPI_Recv ( &all_xo[ (  (  ( 7 * __DATA_NUM )  +  (  ( worker - 1 )  * __WORKER_DATA_NUM )  )  + __MASTER_DATA_NUM ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
+                MPI_Recv ( &tmp_xo[0], __WORKER_DATA_NUM*8 , MPI_DOUBLE , worker , tag , MPI_COMM_WORLD , &recv_status ) ;
+                __j=0;
+                for( __i=0; __i<__WORKER_DATA_NUM*8; __i++){
+                    all_xo[ ( ( worker - 1 ) * __WORKER_DATA_NUM ) + __MASTER_DATA_NUM +__j ] = tmp_xo[__i];
+                    if (((__i+1)%__WORKER_DATA_NUM)==0)
+                        __j+=(__DATA_NUM-__WORKER_DATA_NUM);
+                    __j++;
+                }
 
             }
 
@@ -374,6 +374,7 @@ int main ( int argc , char** argv ) {
         free ( k4 ) ;
         free ( z ) ;
         free ( all_xo ) ;
+        free ( tmp_xo ) ;
 
     }
 
@@ -645,14 +646,7 @@ int main ( int argc , char** argv ) {
 
             }
 
-            MPI_Send ( &xo[ (  ( 0 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 1 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 2 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 3 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 4 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 5 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 6 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
-            MPI_Send ( &xo[ (  ( 7 * __WORKER_DATA_NUM )  + start ) ] , __WORKER_DATA_NUM , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
+            MPI_Send ( &xo[ start ] , __WORKER_DATA_NUM*8 , MPI_DOUBLE , MASTER , tag , MPI_COMM_WORLD ) ;
 
         }
 
@@ -675,8 +669,8 @@ int main ( int argc , char** argv ) {
 
     }
 
-    t2 = clock();
-    printf("%s node=%d : time=%f(sec)\n", __FILE__, node, (double)(t2 - t1) / CLOCKS_PER_SEC);
+    t2 = MPI_Wtime();
+    printf("%s node=%d : time=%f(sec)\n", __FILE__, node, (double)(t2 - t1) );
     MPI_Finalize (  ) ;
 }
 
