@@ -673,10 +673,10 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
         //add allxo loop
         allxoLoop.addStatement(pSynAllxoIf);
 
-        // j += __DATA_NUM + __WORKER_DATA_NUM
+        // j += __DATA_NUM - __WORKER_DATA_NUM
         createAssign(pSynAllxoIf,
                 pLoopIndexVar2,
-                createPlus(createPlus(m_pDefinedDataSizeVar, pMpiWorkerDataNumIndexVar), pLoopIndexVar2));
+                createPlus(createMinus(m_pDefinedDataSizeVar, pMpiWorkerDataNumIndexVar), pLoopIndexVar2));
 
         // j++
         createAssign(allxoLoop, pLoopIndexVar2, createPlus(pLoopIndexVar2, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));

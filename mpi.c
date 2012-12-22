@@ -318,7 +318,7 @@ int main ( int argc , char** argv ) {
 					all_xo[ (  (  (  ( worker - 1 )  * __WORKER_DATA_NUM )  + __MASTER_DATA_NUM )  + __j ) ] = tmp_xo[__i];
 					if( (  (  ( __i + 1 )  % __WORKER_DATA_NUM )  == 0 ) ){
 
-						__j =  (  ( __DATA_NUM + __WORKER_DATA_NUM )  + __j ) ;
+						__j =  (  ( __DATA_NUM - __WORKER_DATA_NUM )  + __j ) ;
 
 					}
 
