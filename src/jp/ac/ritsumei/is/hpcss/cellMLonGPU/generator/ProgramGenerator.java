@@ -24,6 +24,7 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_leq;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_lt;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_minus;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_plus;
+import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_remainder;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_times;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.parser.CellMLAnalyzer;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.parser.RelMLAnalyzer;
@@ -1031,6 +1032,27 @@ public abstract class ProgramGenerator {
         pMathPul.addFactor(pSecondVar);
 
         return pMathPul;
+    }
+
+    /**
+     * create pFirstVar + pSecondVar
+     * @param pFirstVar
+     * @param pSecondVar
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public Math_remainder createRemainder(MathFactor pFirstVar, MathFactor pSecondVar)
+            throws MathException {
+
+        Math_remainder pMathRemainder =
+                (Math_remainder)MathFactory.createOperator(eMathOperator.MOP_REMAINDER);
+
+        pMathRemainder.addFactor(pFirstVar);
+        pMathRemainder.addFactor(pSecondVar);
+
+        return pMathRemainder;
     }
 
 }

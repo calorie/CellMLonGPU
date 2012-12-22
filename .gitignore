@@ -6,5 +6,5 @@
 .tags
 .git*
 .classpath
-mpi.c
-mpi.exe
+*.exe
+*.o

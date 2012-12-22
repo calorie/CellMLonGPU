@@ -19,6 +19,7 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_eq;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_lt;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_minus;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_plus;
+import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_remainder;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_times;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.parser.CellMLAnalyzer;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.parser.RelMLAnalyzer;
@@ -44,6 +45,7 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
     private static final String COMPROG_LOOP_INDEX_NAME1 = "__i";
     private static final String COMPROG_LOOP_INDEX_NAME2 = "__j";
     private static final String ALL_XO = "all_xo";
+    private static final String TMP_XO = "tmp_xo";
     private static final String END_TIME = "end_time";
     private static final double END_TIME_NUM = 400.0;
     private static final String COMM_SIZE = "comm_size";
@@ -274,6 +276,12 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
         Math_ci pMpiAllXoIndexVar = createDoubleVal(pSynMainFunc, ALL_XO, 1, 0, false);
 
         /*
+         * Assign all nodes result
+         * double* tmp_xo;
+         */
+        Math_ci pMpiTmpXoIndexVar = createDoubleVal(pSynMainFunc, TMP_XO, 1, 0, false);
+
+        /*
          * end time
          * double end_time = 400.0;
          */
@@ -356,8 +364,8 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
         Math_divide pMathDivide = createDivide(m_pDefinedDataSizeVar, pMpiCommSizeIndexVar);
         Math_minus pMathMinus = createMinus(m_pDefinedDataSizeVar, pMpiMasterDataNumIndexVar);
         //add if
-        createAssign(pSynIf, pMpiWorkerDataNumIndexVar, pMathMinus);
         createAssign(pSynIf, pMpiMasterDataNumIndexVar, pMathDivide);
+        createAssign(pSynIf, pMpiWorkerDataNumIndexVar, pMathMinus);
 
         //create else
         SyntaxControl pSynElse = createElse();
@@ -420,7 +428,7 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
             pMathTimesForSlave.addFactor(pMathVarCount);
 
             pMathTimesForMaster.addFactor(pMpiMasterDataNumIndexVar);
-            pMathTimesForSlave.addFactor(pMpiWorkerDataNumIndexVar);
+            pMathTimesForSlave.addFactor(m_pDefinedDataSizeVar);
 
             /*宣言の追加*/
             pSynIfForMasterNode.addStatement(createMalloc(m_pTecMLAnalyzer.getM_vecDiffVar().get(i),
@@ -441,10 +449,29 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
 
         pMathTimesForMaster.addFactor(pMathVarCount);
 
-        pMathTimesForMaster.addFactor(pMpiMasterDataNumIndexVar);
+        pMathTimesForMaster.addFactor(m_pDefinedDataSizeVar);
 
         /*宣言の追加*/
         pSynIfForMasterNode.addStatement(createMalloc(pMpiAllXoIndexVar,
+                pMathTimesForMaster));
+        }
+
+        // tmp_xo malloc
+        {
+        /*データ数を表す数式を生成*/
+        Math_times pMathTimesForMaster =
+                (Math_times)MathFactory.createOperator(eMathOperator.MOP_TIMES);
+
+        Math_cn pMathVarCount =
+            (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN,
+                    String.valueOf(m_pCellMLAnalyzer.getM_vecDiffVar().size()));
+
+        pMathTimesForMaster.addFactor(pMathVarCount);
+
+        pMathTimesForMaster.addFactor(pMpiWorkerDataNumIndexVar);
+
+        /*宣言の追加*/
+        pSynIfForMasterNode.addStatement(createMalloc(pMpiTmpXoIndexVar,
                 pMathTimesForMaster));
         }
 
@@ -464,7 +491,7 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
             pMathTimesForMaster.addFactor(pMathVarCount);
             pMathTimesForSlave.addFactor(pMathVarCount);
             pMathTimesForMaster.addFactor(pMpiMasterDataNumIndexVar);
-            pMathTimesForSlave.addFactor(pMpiWorkerDataNumIndexVar);
+            pMathTimesForSlave.addFactor(m_pDefinedDataSizeVar);
 
             /*宣言の追加*/
             pSynIfForMasterNode.addStatement(createMalloc(m_pTecMLAnalyzer.getM_vecArithVar().get(i),
@@ -488,7 +515,7 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
             pMathTimesForMaster.addFactor(pMathVarCount);
             pMathTimesForSlave.addFactor(pMathVarCount);
             pMathTimesForMaster.addFactor(pMpiMasterDataNumIndexVar);
-            pMathTimesForSlave.addFactor(pMpiWorkerDataNumIndexVar);
+            pMathTimesForSlave.addFactor(m_pDefinedDataSizeVar);
 
             /*宣言の追加*/
             pSynIfForMasterNode.addStatement(createMalloc(m_pTecMLAnalyzer.getM_vecDerivativeVar().get(i),
@@ -597,47 +624,78 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
                         MPI_DOUBLE);
         //MPI_Recv
         //TODO
-        for (int i = 0; i < m_pCellMLAnalyzer.getM_vecDiffVar().size(); i++) {
-            Math_cn allxoLoopVar = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, ""+ i);
-            Math_cn allxoOne = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1");
+        Math_ci recvSize = (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI,
+                            createTimes(pMpiWorkerDataNumIndexVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN,
+                                    ""+m_pCellMLAnalyzer.getM_vecDiffVar().size())).toLegalString());
+        pMpiTmpXoIndexVar.setArrayIndexToBack((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"));
+        pMpiTmpXoIndexVar.setPointerNum(-1);
+        pMpiRecvStatusIndexVar.setPointerNum(-1);
+        SyntaxCallFunction pMpiRecv = createMpiRecv(pMpiTmpXoIndexVar, recvSize,
+                pMpiDouble, pMpiWorkerIndexVar, pMpiTagIndexVar, pMpiRecvStatusIndexVar);
+        recvLoop.addStatement(pMpiRecv);
 
-            //all_xo's[]
-            Math_times tmpTimes = createTimes(allxoLoopVar, m_pDefinedDataSizeVar);
-            Math_minus tmpMinus = createMinus(pMpiWorkerIndexVar, allxoOne);
-            Math_times tmpTimes2 = createTimes(tmpMinus, pMpiWorkerDataNumIndexVar);
-            Math_plus tmpPlus = createPlus(tmpTimes, tmpTimes2);
-            Math_plus allxo = createPlus(tmpPlus, pMpiMasterDataNumIndexVar);
+        // __j = 0;
+        createAssign(recvLoop, pLoopIndexVar2, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"));
 
-            pMpiAllXoIndexVar.setArrayIndexToBack(allxo);
-            pMpiAllXoIndexVar.setPointerNum(-1);
+        // create for loop
+        SyntaxControl allxoLoop = createLoop((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"),
+                recvSize, pLoopIndexVar);
+        recvLoop.addStatement(allxoLoop);
 
-            pMpiRecvStatusIndexVar.setPointerNum(-1);
+        //all_xo's[]
+        Math_plus allxo = createPlus(
+                createPlus(
+                        createTimes(
+                                createMinus(pMpiWorkerIndexVar,
+                                        (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")),
+                                        pMpiWorkerDataNumIndexVar),
+                                        pMpiMasterDataNumIndexVar),
+                                        pLoopIndexVar2);
+        pMpiAllXoIndexVar.setArrayIndexToBack(allxo);
+        pMpiTmpXoIndexVar.setPointerNum(0);
+        pMpiTmpXoIndexVar.setArrayIndexToBack(pLoopIndexVar);
+        createAssign(allxoLoop,
+                (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI, pMpiAllXoIndexVar.toLegalString()),
+                (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI, pMpiTmpXoIndexVar.toLegalString()));
 
-            SyntaxCallFunction pMpiRecv = createMpiRecv(pMpiAllXoIndexVar, pMpiWorkerDataNumIndexVar,
-                    pMpiDouble, pMpiWorkerIndexVar, pMpiTagIndexVar, pMpiRecvStatusIndexVar);
-            recvLoop.addStatement(pMpiRecv);
+        //create if for set allxoo
+        pMathEq = (Math_eq)MathFactory.createOperator(eMathOperator.MOP_EQ);
+        //create if
+        SyntaxControl pSynAllxoIf = createIf(
+                createCondition(
+                        createRemainder(
+                                createPlus(
+                                        pLoopIndexVar,
+                                        (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")),
+                                        pMpiWorkerDataNumIndexVar),
+                                        (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"),
+                                        pMathEq));
+        //add allxo loop
+        allxoLoop.addStatement(pSynAllxoIf);
 
-        }
+        // j += __DATA_NUM + __WORKER_DATA_NUM
+        createAssign(pSynAllxoIf,
+                pLoopIndexVar2,
+                createPlus(createPlus(m_pDefinedDataSizeVar, pMpiWorkerDataNumIndexVar), pLoopIndexVar2));
+
+        // j++
+        createAssign(allxoLoop, pLoopIndexVar2, createPlus(pLoopIndexVar2, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
 
         //MPI_Send
         //TODO
-        for (int i = 0; i < m_pCellMLAnalyzer.getM_vecDiffVar().size(); i++) {
-            Math_cn sendLoopVar = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, ""+ i);
+        Math_ci pMpixo =
+                (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI,
+                        MPI_XO);
+        pMpixo.setArrayIndexToBack(pLoopIndexStartVar);
+        pMpixo.setPointerNum(-1);
 
-            Math_times pMathTimesForSendxo = createTimes(sendLoopVar, pMpiWorkerDataNumIndexVar);
-            Math_plus xo = createPlus(pMathTimesForSendxo, pLoopIndexStartVar);
+        Math_ci sendSize = (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI,
+                            createTimes(pMpiWorkerDataNumIndexVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN,
+                                    ""+m_pCellMLAnalyzer.getM_vecDiffVar().size())).toLegalString());
+        SyntaxCallFunction pMpiSend = createMpiSend(pMpixo, sendSize, pMpiDouble,
+                m_pDefinedDataSizeVar2, pMpiTagIndexVar);
 
-            Math_ci pMpixo =
-                    (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI,
-                            MPI_XO);
-            pMpixo.setArrayIndexToBack(xo);
-            pMpixo.setPointerNum(-1);
-
-            SyntaxCallFunction pMpiSend = createMpiSend(pMpixo, pMpiWorkerDataNumIndexVar, pMpiDouble,
-                    m_pDefinedDataSizeVar2, pMpiTagIndexVar);
-
-            pSynFor1ForSlave.addStatement(pMpiSend);
-        }
+        pSynFor1ForSlave.addStatement(pMpiSend);
 
         //----------------------------------------------
         //free関数呼び出しの追加
@@ -673,6 +731,10 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
         pMpiAllXoIndexVar.clearArrayIndex();
         pMpiAllXoIndexVar.setPointerNum(0);
         pSynIfForMasterNode.addStatement(createFree(pMpiAllXoIndexVar));
+
+        //free tmp_xo
+        pMpiTmpXoIndexVar.clearArrayIndex();
+        pSynIfForMasterNode.addStatement(createFree(pMpiTmpXoIndexVar));
 
         //MPI_Finalize
         pSynMainFunc.addStatement(this.createMpiFinalize());

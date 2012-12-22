@@ -49,6 +49,8 @@ public class MathFactory {
 			return new Math_plus();
 		case MOP_TIMES:
 			return new Math_times();
+		case MOP_REMAINDER:
+			return new Math_remainder();
 		case MOP_EXP:
 			return new Math_exp();
 		case MOP_LOG:

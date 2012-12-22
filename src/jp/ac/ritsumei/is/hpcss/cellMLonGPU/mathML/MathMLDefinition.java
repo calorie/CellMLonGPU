@@ -22,6 +22,7 @@ public class MathMLDefinition {
 	public static final String MATH_OPERATOR_STR_MINUS	 = "minus";
 	public static final String MATH_OPERATOR_STR_PLUS	 = "plus";
 	public static final String MATH_OPERATOR_STR_TIMES	 = "times";
+	public static final String MATH_OPERATOR_STR_REMAINDER = "remainder";
 	public static final String MATH_OPERATOR_STR_EXP	 = "exp";
 	public static final String MATH_OPERATOR_STR_LOG	 = "log";
 	public static final String MATH_OPERATOR_STR_POWER	 = "power";
@@ -56,6 +57,7 @@ public class MathMLDefinition {
 	public static final int MATH_OPERATOR_MIN_FACTOR_MINUS = 1;
 	public static final int MATH_OPERATOR_MIN_FACTOR_PLUS = 1;
 	public static final int MATH_OPERATOR_MIN_FACTOR_TIMES = 2;
+	public static final int MATH_OPERATOR_MIN_FACTOR_REMAINDER = 2;
 	public static final int MATH_OPERATOR_MIN_FACTOR_EXP = 1;
 	public static final int MATH_OPERATOR_MIN_FACTOR_LOG = 1;
 	public static final int MATH_OPERATOR_MIN_FACTOR_POWER = 2;
@@ -116,6 +118,7 @@ public class MathMLDefinition {
 		MOP_MINUS	(MATH_OPERATOR_STR_MINUS),
 		MOP_PLUS	(MATH_OPERATOR_STR_PLUS),
 		MOP_TIMES	(MATH_OPERATOR_STR_TIMES),
+		MOP_REMAINDER (MATH_OPERATOR_STR_REMAINDER),
 		MOP_EXP		(MATH_OPERATOR_STR_EXP),
 		MOP_LOG		(MATH_OPERATOR_STR_LOG),
 		MOP_POWER	(MATH_OPERATOR_STR_POWER),
