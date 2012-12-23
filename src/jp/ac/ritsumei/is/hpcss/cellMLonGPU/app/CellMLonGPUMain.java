@@ -24,16 +24,15 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 public class CellMLonGPUMain {
 
-    //========================================================
-    //DEFINE
-    //========================================================
+    // ========================================================
+    // DEFINE
+    // ========================================================
     private static final String MAIN_VAR_RELATION_FILENAME = "relation.txt";
     private static final String MAIN_VAR_INITIALIZE_FILENAME = "initialize.txt";
     private static final String MPI_FILENAME = "mpi.c";
 
     /** Default parser name. */
-    protected static final String DEFAULT_PARSER_NAME =
-        "org.apache.xerces.parsers.SAXParser";
+    protected static final String DEFAULT_PARSER_NAME = "org.apache.xerces.parsers.SAXParser";
 
     private static final String GENERATOR_CUDA = "cuda";
     private static final String GENERATOR_COMMON = "common";
@@ -44,27 +43,28 @@ public class CellMLonGPUMain {
     protected static String generatorName = DEFALUT_GENERATOR;
     protected static Boolean isTestGenerate = false;
 
-    //===================================================
-    //main
-    //	エントリポイント関数
+    // ===================================================
+    // main
+    // エントリポイント関数
     //
-    //@arg
-    // int	nArgc		: コマンドライン文字列数
-    // char	**pszArgv	: コマンドライン文字列
+    // @arg
+    // int nArgc : コマンドライン文字列数
+    // char **pszArgv : コマンドライン文字列
     //
-    //@return
-    //	終了コード		: int
-    //===================================================
+    // @return
+    // 終了コード : int
+    // ===================================================
     public static void main(String[] args) {
 
-        //---------------------------------------------------
-        //実行開始時処理
-        //---------------------------------------------------
-        /*引数チェック*/
+        // ---------------------------------------------------
+        // 実行開始時処理
+        // ---------------------------------------------------
+        /* 引数チェック */
         int n = 0;
         if (args.length > n && args[n].startsWith("-")) {
             if (args[n].equals("-g") || args[n].equals("-gt")) {
-                if (args[n].equals("-gt")) isTestGenerate = true;
+                if (args[n].equals("-gt"))
+                    isTestGenerate = true;
                 n++;
                 if (args.length > n) {
                     generatorName = args[n];
@@ -75,7 +75,7 @@ public class CellMLonGPUMain {
                     System.exit(1);
                 }
             } else {
-                System.err.println("error: unknown option ("+args[n]+").");
+                System.err.println("error: unknown option (" + args[n] + ").");
                 printUsage();
                 System.exit(1);
             }
@@ -85,12 +85,12 @@ public class CellMLonGPUMain {
             printUsage();
             System.exit(1);
         }
-//		String xml = "";
+        // String xml = "";
         String xml = args[n];
 
-        //---------------------------------------------------
-        //XMLパーサ初期化
-        //---------------------------------------------------
+        // ---------------------------------------------------
+        // XMLパーサ初期化
+        // ---------------------------------------------------
         // create parser
         XMLReader parser = null;
         try {
@@ -98,63 +98,65 @@ public class CellMLonGPUMain {
             // バッファサイズが小さいと ハンドラの characters() が
             // 文字列を途中で切った値を返す。バッファサイズを大きくする
             // デフォルトは2k
-            parser.setProperty("http://apache.org/xml/properties/input-buffer-size",
+            parser.setProperty(
+                    "http://apache.org/xml/properties/input-buffer-size",
                     new Integer(16 * 0x1000));
         } catch (Exception e) {
             System.err.println("error: Unable to instantiate parser ("
-                    + DEFAULT_PARSER_NAME+")");
+                    + DEFAULT_PARSER_NAME + ")");
             System.exit(1);
         }
 
-        //---------------------------------------------------
-        //解析処理
-        //---------------------------------------------------
-        /*解析器インスタンス生成*/
+        // ---------------------------------------------------
+        // 解析処理
+        // ---------------------------------------------------
+        /* 解析器インスタンス生成 */
         CellMLVariableAnalyzer pCellMLVariableAnalyzer = new CellMLVariableAnalyzer();
         CellMLAnalyzer pCellMLAnalyzer = new CellMLAnalyzer();
         RelMLAnalyzer pRelMLAnalyzer = new RelMLAnalyzer();
         TecMLAnalyzer pTecMLAnalyzer = new TecMLAnalyzer();
 
-        /*各ファイル名初期化*/
+        /* 各ファイル名初期化 */
         String strRelMLFileName = xml;
         String strTecMLFileName;
         String strCellMLFileName;
 
-        /*RelMLの解析*/
-        if(!parseXMLFile(strRelMLFileName, parser, pRelMLAnalyzer)){
+        /* RelMLの解析 */
+        if (!parseXMLFile(strRelMLFileName, parser, pRelMLAnalyzer)) {
             System.exit(1);
         }
-//		System.out.println("******* RelML parse end ");
+        // System.out.println("******* RelML parse end ");
 
-        /*読み込みファイル名取得*/
+        /* 読み込みファイル名取得 */
         strTecMLFileName = pRelMLAnalyzer.getFileNameTecML();
         strCellMLFileName = pRelMLAnalyzer.getFileNameCellML();
 
-        /*CellML変数部分の解析*/
-        if(!parseXMLFile(strCellMLFileName, parser, pCellMLVariableAnalyzer)){
+        /* CellML変数部分の解析 */
+        if (!parseXMLFile(strCellMLFileName, parser, pCellMLVariableAnalyzer)) {
             System.exit(1);
         }
-//		System.out.println("******* CellML変数 parse end");
+        // System.out.println("******* CellML変数 parse end");
 
-        /*変数テーブルをCellML解析器に渡す*/
-        pCellMLAnalyzer.setComponentTable(pCellMLVariableAnalyzer.getComponentTable());
+        /* 変数テーブルをCellML解析器に渡す */
+        pCellMLAnalyzer.setComponentTable(pCellMLVariableAnalyzer
+                .getComponentTable());
 
-        /*CellMLの解析*/
-        if(!parseXMLFile(strCellMLFileName, parser, pCellMLAnalyzer)){
+        /* CellMLの解析 */
+        if (!parseXMLFile(strCellMLFileName, parser, pCellMLAnalyzer)) {
             System.exit(1);
         }
-//		System.out.println("******* CellML parse end");
+        // System.out.println("******* CellML parse end");
 
-        /*TecMLの解析*/
-        if(!parseXMLFile(strTecMLFileName,parser,pTecMLAnalyzer)){
+        /* TecMLの解析 */
+        if (!parseXMLFile(strTecMLFileName, parser, pTecMLAnalyzer)) {
             System.exit(1);
         }
-//		System.out.println("******* TecML parse end");
+        // System.out.println("******* TecML parse end");
 
-        //---------------------------------------------------
-        //目的プログラム生成
-        //---------------------------------------------------
-        /*プログラム生成器インスタンス生成*/
+        // ---------------------------------------------------
+        // 目的プログラム生成
+        // ---------------------------------------------------
+        /* プログラム生成器インスタンス生成 */
         ProgramGenerator pProgramGenerator = null;
         SyntaxProgram pSynProgram = null;
         ProgramGenerator pSerialProgramGenerator = null;
@@ -162,72 +164,73 @@ public class CellMLonGPUMain {
 
         try {
             if (generatorName.equals(GENERATOR_CUDA)) {
-                pProgramGenerator =
-                    new CudaProgramGenerator(pCellMLAnalyzer,pRelMLAnalyzer,pTecMLAnalyzer);
+                pProgramGenerator = new CudaProgramGenerator(pCellMLAnalyzer,
+                        pRelMLAnalyzer, pTecMLAnalyzer);
             } else if ((generatorName.equals(GENERATOR_COMMON))) {
-                pProgramGenerator =
-                    new CommonProgramGenerator(pCellMLAnalyzer,pRelMLAnalyzer,pTecMLAnalyzer);
+                pProgramGenerator = new CommonProgramGenerator(pCellMLAnalyzer,
+                        pRelMLAnalyzer, pTecMLAnalyzer);
             } else if ((generatorName.equals(GENERATOR_SIMPLE))) {
-                pProgramGenerator =
-                    new SimpleProgramGenerator(pCellMLAnalyzer,pRelMLAnalyzer,pTecMLAnalyzer);
+                pProgramGenerator = new SimpleProgramGenerator(pCellMLAnalyzer,
+                        pRelMLAnalyzer, pTecMLAnalyzer);
             } else if ((generatorName.equals(GENERATOR_MPI))) {
-                pProgramGenerator =
-                    new MpiProgramGenerator(pCellMLAnalyzer,pRelMLAnalyzer,pTecMLAnalyzer);
-            }else {
-                System.err.println("error: invalid Generator name ("+generatorName+").");
+                pProgramGenerator = new MpiProgramGenerator(pCellMLAnalyzer,
+                        pRelMLAnalyzer, pTecMLAnalyzer);
+            } else {
+                System.err.println("error: invalid Generator name ("
+                        + generatorName + ").");
                 printUsage();
                 System.exit(1);
             }
 
-            /*パラメータをハードコードで設定*/
+            /* パラメータをハードコードで設定 */
             pProgramGenerator.setElementNum(1024);
-            pProgramGenerator.setTimeParam(0.0,400.0,0.01);
+            pProgramGenerator.setTimeParam(0.0, 400.0, 0.01);
             pProgramGenerator.setIsTestGenerate(isTestGenerate);
 
-            /*プログラム構文出力*/
+            /* プログラム構文出力 */
             pSynProgram = pProgramGenerator.getSyntaxProgram();
 
         } catch (Exception e) {
-            /*エラー出力*/
+            /* エラー出力 */
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
             System.err.println("failed to translate program");
             System.exit(1);
         }
 
-        //---------------------------------------------------
-        //出力
-        //---------------------------------------------------
+        // ---------------------------------------------------
+        // 出力
+        // ---------------------------------------------------
         try {
-            /*RelML内容出力*/
-//			pRelMLAnalyzer.printContents();
+            /* RelML内容出力 */
+            // pRelMLAnalyzer.printContents();
 
-            /*CellML内容出力*/
-//			pCellMLAnalyzer.printContents();
+            /* CellML内容出力 */
+            // pCellMLAnalyzer.printContents();
 
-            /*TecML内容出力*/
-//			pTecMLAnalyzer.printContents();
+            /* TecML内容出力 */
+            // pTecMLAnalyzer.printContents();
 
-            /*目的プログラム出力*/
+            /* 目的プログラム出力 */
             if (pSynProgram != null) {
-                /*出力開始線*/
-                //System.out.println("[output]------------------------------------");
+                /* 出力開始線 */
+                // System.out.println("[output]------------------------------------");
 
-                /*プログラム出力*/
-                //console output
-                //System.out.println(pSynProgram.toLegalString());
+                /* プログラム出力 */
+                // console output
+                // System.out.println(pSynProgram.toLegalString());
 
-                //file output
+                // file output
                 String srcDir = "";
                 String programCode = pSynProgram.toLegalString();
 
                 PrintWriter out = null;
-                out = new PrintWriter(
-                        new BufferedWriter(new FileWriter(srcDir + MPI_FILENAME)));
+                out = new PrintWriter(new BufferedWriter(new FileWriter(srcDir
+                        + MPI_FILENAME)));
                 out.println(programCode);
                 out.close();
             }
-//			System.exit(1);		// *ML内容出力確認時に有効にする
+            // System.exit(1); // *ML内容出力確認時に有効にする
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace(System.err);
@@ -236,17 +239,17 @@ public class CellMLonGPUMain {
 
         try {
             PrintWriter out = null;
-            /*変数関係の出力*/
-            out = new PrintWriter(
-                    new BufferedWriter(new FileWriter(MAIN_VAR_RELATION_FILENAME)));
+            /* 変数関係の出力 */
+            out = new PrintWriter(new BufferedWriter(new FileWriter(
+                    MAIN_VAR_RELATION_FILENAME)));
             pProgramGenerator.outputVarRelationList(out);
             out.close();
 
-            /*初期化式の出力*/
-            out = new PrintWriter(
-                    new BufferedWriter(new FileWriter(MAIN_VAR_INITIALIZE_FILENAME)));
+            /* 初期化式の出力 */
+            out = new PrintWriter(new BufferedWriter(new FileWriter(
+                    MAIN_VAR_INITIALIZE_FILENAME)));
             pProgramGenerator.outputInitializeList(out,
-                pCellMLVariableAnalyzer.getComponentTable());
+                    pCellMLVariableAnalyzer.getComponentTable());
             out.close();
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -255,46 +258,47 @@ public class CellMLonGPUMain {
         }
     }
 
-    //=============================================================
-    //parseXMLFile
+    // =============================================================
+    // parseXMLFile
     // XMLファイル解析関数
     //
-    //@arg
-    // string			strXMLFileName	: 読み込みファイル名
-    // SAX2XMLReader*	pParser			: XMLパーサインスタンス
-    // XMLAnalyzer*		pXMLAnalyzer	: RelML解析器インスタンス
+    // @arg
+    // string strXMLFileName : 読み込みファイル名
+    // SAX2XMLReader* pParser : XMLパーサインスタンス
+    // XMLAnalyzer* pXMLAnalyzer : RelML解析器インスタンス
     //
-    //@return
-    // 成否判定	: bool
+    // @return
+    // 成否判定 : bool
     //
-    //=============================================================
+    // =============================================================
     static boolean parseXMLFile(String strXMLFileName, XMLReader pParser,
             XMLAnalyzer pXMLAnalyzer) {
 
         try {
 
-            /*ファイルの存在を確認*/
-            if(!new File(strXMLFileName).canRead()){
+            /* ファイルの存在を確認 */
+            if (!new File(strXMLFileName).canRead()) {
                 System.err.println("file can't open : " + strXMLFileName);
                 return false;
             }
 
-            /*パース処理*/
+            /* パース処理 */
             XMLHandler handler = new XMLHandler(pXMLAnalyzer);
             pParser.setContentHandler(handler);
             pParser.parse(strXMLFileName);
 
         } catch (SAXParseException e) {
-            /*エラー出力*/
+            /* エラー出力 */
             System.err.println("failed to parse file : " + strXMLFileName);
             return false;
         } catch (Exception e) {
 
-            /*例外メッセージ出力*/
-            System.err.println("error: Parse error occurred - "+e.getMessage());
+            /* 例外メッセージ出力 */
+            System.err.println("error: Parse error occurred - "
+                    + e.getMessage());
             Exception se = e;
             if (e instanceof SAXException) {
-                se = ((SAXException)e).getException();
+                se = ((SAXException) e).getException();
             }
             if (se != null) {
                 se.printStackTrace(System.err);
@@ -302,7 +306,7 @@ public class CellMLonGPUMain {
                 e.printStackTrace(System.err);
             }
 
-            /*エラー出力*/
+            /* エラー出力 */
             System.err.println("failed to parse file : " + strXMLFileName);
             return false;
         }
@@ -313,8 +317,9 @@ public class CellMLonGPUMain {
     private static void printUsage() {
         System.err.println("usage: ./parser [option] \"filename of RelML\"");
         System.err.println("option:");
-        System.err.println("  -g name     Select Generator by name. {cuda|common|simple}");
+        System.err
+                .println("  -g name     Select Generator by name. {cuda|common|simple}");
         System.err.println("default:");
-        System.err.println("  Generator:  "+DEFALUT_GENERATOR);
+        System.err.println("  Generator:  " + DEFALUT_GENERATOR);
     }
 }

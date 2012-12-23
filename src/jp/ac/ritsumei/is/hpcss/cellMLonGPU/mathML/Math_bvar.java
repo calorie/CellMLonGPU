@@ -8,25 +8,27 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathMLDefinition.eMathOperator
  */
 public class Math_bvar extends MathOperator {
 
-	/*-----コンストラクタ-----*/
-	public Math_bvar() {
-		super("bvar", eMathOperator.MOP_BVAR, MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_BVAR);
-	}
+    /*-----コンストラクタ-----*/
+    public Math_bvar() {
+        super("bvar", eMathOperator.MOP_BVAR,
+                MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_BVAR);
+    }
 
-	/*-----演算命令メソッド-----*/
-	public double calculate() throws MathException {
-		throw new MathException("Math_bvar","calculate","can't calculate");
-	}
+    /*-----演算命令メソッド-----*/
+    public double calculate() throws MathException {
+        throw new MathException("Math_bvar", "calculate", "can't calculate");
+    }
 
-	/*-----文字列変換メソッド-----*/
-	public String toLegalString() throws MathException {
+    /*-----文字列変換メソッド-----*/
+    public String toLegalString() throws MathException {
 
-		/*被演算子の個数チェック*/
-		if(m_vecFactor.size() < MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_BVAR){
-			throw new MathException("Math_bvar","toLegalString","lack of operand");
-		}
+        /* 被演算子の個数チェック */
+        if (m_vecFactor.size() < MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_BVAR) {
+            throw new MathException("Math_bvar", "toLegalString",
+                    "lack of operand");
+        }
 
-		return "( d" + m_vecFactor.get(0).toLegalString() + " )";
-	}
+        return "( d" + m_vecFactor.get(0).toLegalString() + " )";
+    }
 
 }

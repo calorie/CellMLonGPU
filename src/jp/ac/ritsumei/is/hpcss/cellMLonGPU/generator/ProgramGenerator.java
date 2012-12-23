@@ -124,11 +124,11 @@ public abstract class ProgramGenerator {
         m_dDeltaTime = dDeltaTime;
     }
 
-
     /**
      * set isTestGenerate
+     * 
      * @param isTestGenerate
-     *
+     * 
      * @author Yuu Shigetani
      */
     public void setIsTestGenerate(Boolean isTestGenerate) {
@@ -138,9 +138,11 @@ public abstract class ProgramGenerator {
             m_dEndTime = 0.100000;
         }
     }
+
     public void setTestInitFunc(SyntaxFunction testInitFunc) {
         m_testInitFunc = testInitFunc;
     }
+
     public void setTestFunc(SyntaxFunction testFunc) {
         m_testFunc = testFunc;
     }
@@ -312,36 +314,40 @@ public abstract class ProgramGenerator {
 
     /**
      * create arg
+     * 
      * @param dataType
      * @param argName
      * @return pSynArgDec
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public SyntaxDeclaration createArg(eDataType dataType, int pointerNum, Math_ci pArgVar) throws MathException {
+    public SyntaxDeclaration createArg(eDataType dataType, int pointerNum,
+            Math_ci pArgVar) throws MathException {
         SyntaxDataType pSynType = new SyntaxDataType(dataType, pointerNum);
-        SyntaxDeclaration pSynArgDec = new SyntaxDeclaration(pSynType,
-                pArgVar);
+        SyntaxDeclaration pSynArgDec = new SyntaxDeclaration(pSynType, pArgVar);
         return pSynArgDec;
     }
 
     /**
      * create function
+     * 
      * @param pSynReturnType
      * @param functionName
-     * @param pSynArgs[]
+     * @param pSynArgs
+     *            []
      * @return pSynFunc
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public SyntaxFunction createFunction(SyntaxDataType pSynReturnType, String functionName, SyntaxDeclaration... pSynArgs)
+    public SyntaxFunction createFunction(SyntaxDataType pSynReturnType,
+            String functionName, SyntaxDeclaration... pSynArgs)
             throws MathException {
         /* 関数本体の生成 */
         SyntaxFunction pSynFunc = new SyntaxFunction(functionName,
                 pSynReturnType);
 
         /* 引数宣言の追加 */
-        for (int i=0; i < pSynArgs.length; i++){
+        for (int i = 0; i < pSynArgs.length; i++) {
             pSynFunc.addParam(pSynArgs[i]);
         }
 
@@ -350,10 +356,11 @@ public abstract class ProgramGenerator {
 
     /**
      * create while
+     * 
      * @param pCondition
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public SyntaxControl createWhile(MathFactor pCondition)
@@ -372,14 +379,14 @@ public abstract class ProgramGenerator {
 
     /**
      * create if
+     * 
      * @param pCondition
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public SyntaxControl createIf(MathFactor pCondition)
-            throws MathException {
+    public SyntaxControl createIf(MathFactor pCondition) throws MathException {
         MathExpression pConditionExp = new MathExpression(pCondition);
         /* if条件生成 */
         SyntaxCondition pSynIfCond = new SyntaxCondition(pConditionExp);
@@ -394,17 +401,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create break
+     * 
      * @param pSynControl
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public void createBreak(SyntaxControl pSynControl)
-            throws MathException {
+    public void createBreak(SyntaxControl pSynControl) throws MathException {
 
         /* breakを生成 */
-        MathExpression pBreakExp = new MathExpression((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "break"));
+        MathExpression pBreakExp = new MathExpression(
+                (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN,
+                        "break"));
         SyntaxExpression pSynBreak = new SyntaxExpression(pBreakExp);
 
         /* breakを追加 */
@@ -414,17 +423,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create continue
+     * 
      * @param pControl
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public void createContinue(SyntaxControl pSynControl)
-            throws MathException {
+    public void createContinue(SyntaxControl pSynControl) throws MathException {
 
         /* continueを生成 */
-        MathExpression pContinueExp = new MathExpression((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "continue"));
+        MathExpression pContinueExp = new MathExpression(
+                (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN,
+                        "continue"));
         SyntaxExpression pSynContinue = new SyntaxExpression(pContinueExp);
 
         /* continueを追加 */
@@ -434,30 +445,32 @@ public abstract class ProgramGenerator {
 
     /**
      * create condition
+     * 
      * @param pFirstVariable
      * @param pSecondVariable
      * @param pCondition
      * @return pConditionExp
-     *
+     * 
      * @author Yuu Shigetani
      */
     public MathFactor createCondition(MathFactor pFirstVariable,
             MathFactor pSecondVariable, MathOperator pCondition) {
-        //add element
+        // add element
         pCondition.addFactor(pFirstVariable);
         pCondition.addFactor(pSecondVariable);
-        //conect elements
-        //MathExpression pConditionExp = new MathExpression(pCondition);
+        // conect elements
+        // MathExpression pConditionExp = new MathExpression(pCondition);
 
         return pCondition;
     }
 
     /**
      * create else if
+     * 
      * @param pCondition
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public SyntaxControl createElseIf(MathFactor pCondition)
@@ -476,9 +489,10 @@ public abstract class ProgramGenerator {
 
     /**
      * create else
+     * 
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public SyntaxControl createElse() throws MathException {
@@ -492,8 +506,8 @@ public abstract class ProgramGenerator {
         return pSynElseIf;
     }
 
-    public SyntaxControl createLoop(Math_cn workerStartNum,
-            Math_ci pEnd, MathOperand pLoopVariable) throws MathException {
+    public SyntaxControl createLoop(Math_cn workerStartNum, Math_ci pEnd,
+            MathOperand pLoopVariable) throws MathException {
 
         /* ループ条件式生成 */
         Math_lt pMathLt = (Math_lt) MathFactory
@@ -529,8 +543,8 @@ public abstract class ProgramGenerator {
         return pSynFor;
     }
 
-    public SyntaxControl createLoop(Math_ci workerStartNum,
-            Math_ci pEnd, MathOperand pLoopVariable) throws MathException {
+    public SyntaxControl createLoop(Math_ci workerStartNum, Math_ci pEnd,
+            MathOperand pLoopVariable) throws MathException {
 
         /* ループ条件式生成 */
         Math_lt pMathLt = (Math_lt) MathFactory
@@ -565,6 +579,7 @@ public abstract class ProgramGenerator {
         /* ループ構文を返す */
         return pSynFor;
     }
+
     // ========================================================
     // createSyntaxDataNumLoop
     // データ数ループ構文インスタンスを生成
@@ -785,11 +800,11 @@ public abstract class ProgramGenerator {
         pSynMallocCall.addArgFactor(pMallocArg);
 
         /* 戻り値をキャスト */
-        SyntaxDataType pSynPCharType = new SyntaxDataType(
-                eDataType.DT_CHAR, 1);
+        SyntaxDataType pSynPCharType = new SyntaxDataType(eDataType.DT_CHAR, 1);
         pSynMallocCall.addCastDataType(pSynPCharType);
         Math_ci pMathTmpVar = (Math_ci) MathFactory.createOperand(
-                eMathOperand.MOPD_CI, pSynMallocCall.toLegalStringWithNoSemicolon());
+                eMathOperand.MOPD_CI,
+                pSynMallocCall.toLegalStringWithNoSemicolon());
 
         /* 代入式を生成 */
         createAssign(pSynFunc, pDstVar, pMathTmpVar);
@@ -821,13 +836,15 @@ public abstract class ProgramGenerator {
 
     /**
      * create int variable
-     *
-     * @param SyntaxFunction pSynMainFunc
-     * @param String variableName
+     * 
+     * @param SyntaxFunction
+     *            pSynMainFunc
+     * @param String
+     *            variableName
      * @param int pNum
      * @param int variableNum
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public Math_ci createIntVal(SyntaxFunction pSynMainFunc,
@@ -862,13 +879,15 @@ public abstract class ProgramGenerator {
 
     /**
      * create double variable
-     *
-     * @param SyntaxFunction pSynMainFunc
-     * @param String variableName
+     * 
+     * @param SyntaxFunction
+     *            pSynMainFunc
+     * @param String
+     *            variableName
      * @param int pNum
      * @param int variableNum
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public Math_ci createDoubleVal(SyntaxFunction pSynMainFunc,
@@ -904,33 +923,33 @@ public abstract class ProgramGenerator {
 
     /**
      * create char variable
-     *
-     * @param SyntaxFunction pSynMainFunc
-     * @param String variableName
+     * 
+     * @param SyntaxFunction
+     *            pSynMainFunc
+     * @param String
+     *            variableName
      * @param int pNum
      * @param int variableNum
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public Math_ci createCharVal(SyntaxFunction pSynFunc,
-            String variableName, int pointerNum, String defaultString)
-            throws MathException {
+    public Math_ci createCharVal(SyntaxFunction pSynFunc, String variableName,
+            int pointerNum, String defaultString) throws MathException {
         Math_ci pCharVar = (Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, variableName);
 
         /* 変数を関数に宣言追加 */
         {
-            SyntaxDataType pSynTypeInt = new SyntaxDataType(
-                    eDataType.DT_CHAR, pointerNum);
+            SyntaxDataType pSynTypeInt = new SyntaxDataType(eDataType.DT_CHAR,
+                    pointerNum);
             SyntaxDeclaration pDecVar = new SyntaxDeclaration(pSynTypeInt,
                     pCharVar);
 
-            if ( defaultString != null ) {
+            if (defaultString != null) {
                 /* 初期化式の生成 */
                 Math_cn pConstDeltaVal = (Math_cn) MathFactory.createOperand(
-                        eMathOperand.MOPD_CN,
-                        defaultString);
+                        eMathOperand.MOPD_CN, defaultString);
                 MathExpression pInitExpression = new MathExpression(
                         pConstDeltaVal);
 
@@ -946,24 +965,26 @@ public abstract class ProgramGenerator {
 
     /**
      * create assign and add func
-     *
+     * 
      * @param pSynFunc
      * @param pSynCont
      * @param pDstVar
      * @param pInsVar
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public void createAssign(SyntaxFunction pSynFunc,
-            Math_ci pDstVar, MathFactor pInsVar) throws MathException {
+    public void createAssign(SyntaxFunction pSynFunc, Math_ci pDstVar,
+            MathFactor pInsVar) throws MathException {
         /* 代入式を生成 */
-        Math_assign pMathAssign = (Math_assign) MathFactory.createOperator(eMathOperator.MOP_ASSIGN);
+        Math_assign pMathAssign = (Math_assign) MathFactory
+                .createOperator(eMathOperator.MOP_ASSIGN);
 
         pMathAssign.addFactor(pDstVar);
         pMathAssign.addFactor(pInsVar);
         MathExpression pNewExpression = new MathExpression(pMathAssign);
-        SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
+        SyntaxExpression pNewSynExpression = new SyntaxExpression(
+                pNewExpression);
 
         // add func
         pSynFunc.addStatement(pNewSynExpression);
@@ -971,24 +992,26 @@ public abstract class ProgramGenerator {
 
     /**
      * create assign and add control
-     *
+     * 
      * @param pSynFunc
      * @param pSynCont
      * @param pDstVar
      * @param pInsVar
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public void createAssign(SyntaxControl pSynCont,
-            Math_ci pDstVar, MathFactor pInsVar) throws MathException {
+    public void createAssign(SyntaxControl pSynCont, Math_ci pDstVar,
+            MathFactor pInsVar) throws MathException {
         /* 代入式を生成 */
-        Math_assign pMathAssign = (Math_assign) MathFactory.createOperator(eMathOperator.MOP_ASSIGN);
+        Math_assign pMathAssign = (Math_assign) MathFactory
+                .createOperator(eMathOperator.MOP_ASSIGN);
 
         pMathAssign.addFactor(pDstVar);
         pMathAssign.addFactor(pInsVar);
         MathExpression pNewExpression = new MathExpression(pMathAssign);
-        SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
+        SyntaxExpression pNewSynExpression = new SyntaxExpression(
+                pNewExpression);
 
         // add control
         pSynCont.addStatement(pNewSynExpression);
@@ -997,18 +1020,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar * pSecondVar
+     * 
      * @param pFirstVar
      * @param pSecondVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public Math_times createTimes(MathFactor pFirstVar, MathFactor pSecondVar)
             throws MathException {
 
-        Math_times pMathTimes =
-                (Math_times)MathFactory.createOperator(eMathOperator.MOP_TIMES);
+        Math_times pMathTimes = (Math_times) MathFactory
+                .createOperator(eMathOperator.MOP_TIMES);
 
         pMathTimes.addFactor(pFirstVar);
         pMathTimes.addFactor(pSecondVar);
@@ -1018,18 +1042,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar / pSecondVar
+     * 
      * @param pFirstVar
      * @param pSecondVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public Math_divide createDivide(MathFactor pFirstVar, MathFactor pSecondVar)
             throws MathException {
 
-        Math_divide pMathDiv =
-                (Math_divide)MathFactory.createOperator(eMathOperator.MOP_DIVIDE);
+        Math_divide pMathDiv = (Math_divide) MathFactory
+                .createOperator(eMathOperator.MOP_DIVIDE);
 
         pMathDiv.addFactor(pFirstVar);
         pMathDiv.addFactor(pSecondVar);
@@ -1039,18 +1064,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar - pSecondVar
+     * 
      * @param pFirstVar
      * @param pSecondVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public Math_minus createMinus(MathFactor pFirstVar, MathFactor pSecondVar)
             throws MathException {
 
-        Math_minus pMathMin =
-                (Math_minus)MathFactory.createOperator(eMathOperator.MOP_MINUS);
+        Math_minus pMathMin = (Math_minus) MathFactory
+                .createOperator(eMathOperator.MOP_MINUS);
 
         pMathMin.addFactor(pFirstVar);
         pMathMin.addFactor(pSecondVar);
@@ -1060,18 +1086,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar + pSecondVar
+     * 
      * @param pFirstVar
      * @param pSecondVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public Math_plus createPlus(MathFactor pFirstVar, MathFactor pSecondVar)
             throws MathException {
 
-        Math_plus pMathPul =
-                (Math_plus)MathFactory.createOperator(eMathOperator.MOP_PLUS);
+        Math_plus pMathPul = (Math_plus) MathFactory
+                .createOperator(eMathOperator.MOP_PLUS);
 
         pMathPul.addFactor(pFirstVar);
         pMathPul.addFactor(pSecondVar);
@@ -1081,18 +1108,19 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar % pSecondVar
+     * 
      * @param pFirstVar
      * @param pSecondVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public Math_remainder createRemainder(MathFactor pFirstVar, MathFactor pSecondVar)
-            throws MathException {
+    public Math_remainder createRemainder(MathFactor pFirstVar,
+            MathFactor pSecondVar) throws MathException {
 
-        Math_remainder pMathRemainder =
-                (Math_remainder)MathFactory.createOperator(eMathOperator.MOP_REMAINDER);
+        Math_remainder pMathRemainder = (Math_remainder) MathFactory
+                .createOperator(eMathOperator.MOP_REMAINDER);
 
         pMathRemainder.addFactor(pFirstVar);
         pMathRemainder.addFactor(pSecondVar);
@@ -1102,17 +1130,17 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar ++
+     * 
      * @param pFirstVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public Math_inc createInc(MathFactor pIncVar)
-            throws MathException {
+    public Math_inc createInc(MathFactor pIncVar) throws MathException {
 
-        Math_inc pMathInc =
-                (Math_inc)MathFactory.createOperator(eMathOperator.MOP_INC);
+        Math_inc pMathInc = (Math_inc) MathFactory
+                .createOperator(eMathOperator.MOP_INC);
 
         pMathInc.addFactor(pIncVar);
 
@@ -1121,17 +1149,17 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar --
+     * 
      * @param pFirstVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
-    public Math_dec createDec(MathFactor pDecVar)
-            throws MathException {
+    public Math_dec createDec(MathFactor pDecVar) throws MathException {
 
-        Math_dec pMathDec =
-                (Math_dec)MathFactory.createOperator(eMathOperator.MOP_DEC);
+        Math_dec pMathDec = (Math_dec) MathFactory
+                .createOperator(eMathOperator.MOP_DEC);
 
         pMathDec.addFactor(pDecVar);
 
@@ -1140,37 +1168,40 @@ public abstract class ProgramGenerator {
 
     /**
      * create pFirstVar ++
+     * 
      * @param pFirstVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public void createIncExp(SyntaxControl pSynControl, MathFactor pIncVar)
             throws MathException {
 
         MathExpression pNewExpression = new MathExpression(createInc(pIncVar));
-        SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
+        SyntaxExpression pNewSynExpression = new SyntaxExpression(
+                pNewExpression);
         pSynControl.addStatement(pNewSynExpression);
 
     }
 
     /**
      * create pFirstVar --
+     * 
      * @param pFirstVar
      * @return
      * @throws MathException
-     *
+     * 
      * @author Yuu Shigetani
      */
     public void createDecExp(SyntaxControl pSynControl, MathFactor pDecVar)
             throws MathException {
 
         MathExpression pNewExpression = new MathExpression(createDec(pDecVar));
-        SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
+        SyntaxExpression pNewSynExpression = new SyntaxExpression(
+                pNewExpression);
         pSynControl.addStatement(pNewSynExpression);
 
     }
 
 }
-

@@ -8,31 +8,33 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathMLDefinition.eMathOperator
  */
 public class Math_ceil extends MathOperator {
 
-	/*-----コンストラクタ-----*/
-	public Math_ceil() {
-		super("ceil", eMathOperator.MOP_CEIL, MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_CEIL);
-	}
+    /*-----コンストラクタ-----*/
+    public Math_ceil() {
+        super("ceil", eMathOperator.MOP_CEIL,
+                MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_CEIL);
+    }
 
-	/*-----演算命令メソッド-----*/
-	public double calculate() throws MathException {
-		/*被演算子の個数チェック*/
-		if(m_vecFactor.size() < MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_CEIL){
-			throw new MathException("Math_ceil","calculate","lack of operand");
-		}
+    /*-----演算命令メソッド-----*/
+    public double calculate() throws MathException {
+        /* 被演算子の個数チェック */
+        if (m_vecFactor.size() < MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_CEIL) {
+            throw new MathException("Math_ceil", "calculate", "lack of operand");
+        }
 
-		/*演算結果を返す*/
-		return Math.ceil(m_vecFactor.get(0).getValue());
-	}
+        /* 演算結果を返す */
+        return Math.ceil(m_vecFactor.get(0).getValue());
+    }
 
-	/*-----文字列変換メソッド-----*/
-	public String toLegalString() throws MathException {
+    /*-----文字列変換メソッド-----*/
+    public String toLegalString() throws MathException {
 
-		/*被演算子の個数チェック*/
-		if(m_vecFactor.size() < MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_CEIL){
-			throw new MathException("Math_ceil","toLegalString","lack of operand");
-		}
+        /* 被演算子の個数チェック */
+        if (m_vecFactor.size() < MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_CEIL) {
+            throw new MathException("Math_ceil", "toLegalString",
+                    "lack of operand");
+        }
 
-		return "ceil( " + m_vecFactor.get(0).toLegalString() + " )";
-	}
+        return "ceil( " + m_vecFactor.get(0).toLegalString() + " )";
+    }
 
 }

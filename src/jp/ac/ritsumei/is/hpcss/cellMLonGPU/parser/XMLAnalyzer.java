@@ -12,15 +12,18 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.exception.XMLException;
  */
 public abstract class XMLAnalyzer {
 
-	/*-----コンストラクタ-----*/
-	public XMLAnalyzer() {
-	}
+    /*-----コンストラクタ-----*/
+    public XMLAnalyzer() {
+    }
 
-	/*-----解析関連仮想メソッド-----*/
-	abstract public void findTagStart(String strTag, XMLAttribute pXMLAttr)
-	throws MathException, XMLException, RelMLException, CellMLException, TecMLException;
-	abstract public void findTagEnd(String strTag)
-	throws MathException, RelMLException, CellMLException;
-	abstract public void findText(String strText)
-	throws MathException, CellMLException, TableException;
+    /*-----解析関連仮想メソッド-----*/
+    abstract public void findTagStart(String strTag, XMLAttribute pXMLAttr)
+            throws MathException, XMLException, RelMLException,
+            CellMLException, TecMLException;
+
+    abstract public void findTagEnd(String strTag) throws MathException,
+            RelMLException, CellMLException;
+
+    abstract public void findText(String strText) throws MathException,
+            CellMLException, TableException;
 }

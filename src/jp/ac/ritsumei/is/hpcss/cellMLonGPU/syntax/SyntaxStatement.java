@@ -5,9 +5,9 @@ package jp.ac.ritsumei.is.hpcss.cellMLonGPU.syntax;
  */
 public abstract class SyntaxStatement extends Syntax {
 
-	/*-----コンストラクタ-----*/
-	public SyntaxStatement(eSyntaxClassification classification) {
-		super(classification);
-	}
+    /*-----コンストラクタ-----*/
+    public SyntaxStatement(eSyntaxClassification classification) {
+        super(classification);
+    }
 
 }

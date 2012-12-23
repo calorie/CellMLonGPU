@@ -10,102 +10,107 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathMLDefinition.eMathOperator
  */
 public class Math_fn extends MathOperator {
 
-	/*関数オペランド*/
-	MathOperand m_pFuncOperand;	//こちらが関数名を持つオペランド
-					//m_vecFactorが引数リストとなるので，注意！
+    /* 関数オペランド */
+    MathOperand m_pFuncOperand; // こちらが関数名を持つオペランド
 
-	/*-----コンストラクタ-----*/
-	public Math_fn() {
-		super("", eMathOperator.MOP_FN, MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_FN);
-		m_pFuncOperand = null;
-	}
+    // m_vecFactorが引数リストとなるので，注意！
 
-	/*-----関数オペランド設定メソッド-----*/
-	public void setFuncOperand(MathOperand pFuncOperand) {
-		m_pFuncOperand = pFuncOperand;
-	}
+    /*-----コンストラクタ-----*/
+    public Math_fn() {
+        super("", eMathOperator.MOP_FN,
+                MathMLDefinition.MATH_OPERATOR_MIN_FACTOR_FN);
+        m_pFuncOperand = null;
+    }
 
-	/*-----引数リストベクタメソッド-----*/
-	public Vector<MathFactor> getArgumentsVector() {
-		return m_vecFactor;
-	}
+    /*-----関数オペランド設定メソッド-----*/
+    public void setFuncOperand(MathOperand pFuncOperand) {
+        m_pFuncOperand = pFuncOperand;
+    }
 
-	/*-----数式複製メソッド-----*/
-	public MathFactor createCopy() throws MathException {
-		/*演算子の複製*/
-		Math_fn newOperator = (Math_fn)MathFactory.createOperator(eMathOperator.MOP_FN);
+    /*-----引数リストベクタメソッド-----*/
+    public Vector<MathFactor> getArgumentsVector() {
+        return m_vecFactor;
+    }
 
-		/*すべての子要素を複製*/
-		for (MathFactor it: m_vecFactor) {
-			newOperator.addFactor(it.createCopy());
-		}
+    /*-----数式複製メソッド-----*/
+    public MathFactor createCopy() throws MathException {
+        /* 演算子の複製 */
+        Math_fn newOperator = (Math_fn) MathFactory
+                .createOperator(eMathOperator.MOP_FN);
 
-		/*関数オペランドの設定*/
-		newOperator.setFuncOperand((MathOperand)m_pFuncOperand.createCopy());
+        /* すべての子要素を複製 */
+        for (MathFactor it : m_vecFactor) {
+            newOperator.addFactor(it.createCopy());
+        }
 
-		return newOperator;
-	}
+        /* 関数オペランドの設定 */
+        newOperator.setFuncOperand((MathOperand) m_pFuncOperand.createCopy());
 
-	/*-----演算命令メソッド-----*/
-	public double calculate() throws MathException {
-		throw new MathException("Math_fn","calculate","can't calculate function");
-	}
+        return newOperator;
+    }
 
-	/*-----照合メソッド-----*/
-	public boolean matches(MathOperand pOperand) {
-		return m_pFuncOperand.matches(pOperand);
-	}
+    /*-----演算命令メソッド-----*/
+    public double calculate() throws MathException {
+        throw new MathException("Math_fn", "calculate",
+                "can't calculate function");
+    }
 
-	/*-----照合メソッド-----*/
-	public boolean matches(Math_fn pFunction) {
+    /*-----照合メソッド-----*/
+    public boolean matches(MathOperand pOperand) {
+        return m_pFuncOperand.matches(pOperand);
+    }
 
-		/*関数名の照合*/
-		if(!m_pFuncOperand.matches(pFunction.m_pFuncOperand)) {
-			return false;
-		}
+    /*-----照合メソッド-----*/
+    public boolean matches(Math_fn pFunction) {
 
-		/*すべての子要素との一致を調べる*/
-		if (m_vecFactor.size() != pFunction.m_vecFactor.size()) {
-			return false;
-		}
-		for (int i = 0; i < m_vecFactor.size(); i++) {
-			if (!m_vecFactor.get(i).matches(pFunction.m_vecFactor.get(i))) {
-				return false;
-			}
-		}
+        /* 関数名の照合 */
+        if (!m_pFuncOperand.matches(pFunction.m_pFuncOperand)) {
+            return false;
+        }
 
-		return true;
-	}
+        /* すべての子要素との一致を調べる */
+        if (m_vecFactor.size() != pFunction.m_vecFactor.size()) {
+            return false;
+        }
+        for (int i = 0; i < m_vecFactor.size(); i++) {
+            if (!m_vecFactor.get(i).matches(pFunction.m_vecFactor.get(i))) {
+                return false;
+            }
+        }
 
-	/*-----文字列変換メソッド-----*/
-	public String toLegalString() throws MathException {
+        return true;
+    }
 
-		/*例外処理*/
-		if(m_pFuncOperand == null){
-			throw new MathException("Math_fn","toLegalString","have no function operand");
-		}
+    /*-----文字列変換メソッド-----*/
+    public String toLegalString() throws MathException {
 
-		/*関数名を文字列に追加*/
-		String strExpression = m_pFuncOperand.toLegalString();
+        /* 例外処理 */
+        if (m_pFuncOperand == null) {
+            throw new MathException("Math_fn", "toLegalString",
+                    "have no function operand");
+        }
 
-		/*引数を追加していく*/
-		strExpression += " ( ";
+        /* 関数名を文字列に追加 */
+        String strExpression = m_pFuncOperand.toLegalString();
 
-		for (MathFactor it: m_vecFactor) {
+        /* 引数を追加していく */
+        strExpression += " ( ";
 
-			/*コンマを追加*/
-			if (it != m_vecFactor.firstElement()) {
-				strExpression += " , ";
-			}
+        for (MathFactor it : m_vecFactor) {
 
-			/*項を追加*/
-			strExpression += it.toLegalString();
-		}
+            /* コンマを追加 */
+            if (it != m_vecFactor.firstElement()) {
+                strExpression += " , ";
+            }
 
-		/*閉じ括弧を追加*/
-		strExpression += " ) ";
+            /* 項を追加 */
+            strExpression += it.toLegalString();
+        }
 
-		return strExpression;
-	}
+        /* 閉じ括弧を追加 */
+        strExpression += " ) ";
+
+        return strExpression;
+    }
 
 }

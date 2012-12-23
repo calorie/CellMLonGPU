@@ -6,14 +6,16 @@ package jp.ac.ritsumei.is.hpcss.cellMLonGPU.exception;
 @SuppressWarnings("serial")
 public class TranslateException extends Exception {
 
-	/*-----コンストラクタ-----*/
-	public TranslateException(String strClassName, String strFunctionName, String strMessage) {
-		super(strClassName, strFunctionName, strMessage);
-	}
+    /*-----コンストラクタ-----*/
+    public TranslateException(String strClassName, String strFunctionName,
+            String strMessage) {
+        super(strClassName, strFunctionName, strMessage);
+    }
 
-	/*-----メッセージ取得-----*/
-	public String getMessage() {
-		return "TranslateException In [" + m_strClassName + "." + m_strFunctionName + "] " + m_strMessage;
-	}
+    /*-----メッセージ取得-----*/
+    public String getMessage() {
+        return "TranslateException In [" + m_strClassName + "."
+                + m_strFunctionName + "] " + m_strMessage;
+    }
 
 }
