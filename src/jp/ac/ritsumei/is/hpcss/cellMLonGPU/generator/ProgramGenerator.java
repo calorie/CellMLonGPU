@@ -132,8 +132,10 @@ public abstract class ProgramGenerator {
      */
     public void setIsTestGenerate(Boolean isTestGenerate) {
         m_isTestGenerate = isTestGenerate;
-        m_unElementNum = 32;
-        m_dEndTime = 0.100000;
+        if (isTestGenerate) {
+            m_unElementNum = 32;
+            m_dEndTime = 0.100000;
+        }
     }
     public void setTestInitFunc(SyntaxFunction testInitFunc) {
         m_testInitFunc = testInitFunc;
