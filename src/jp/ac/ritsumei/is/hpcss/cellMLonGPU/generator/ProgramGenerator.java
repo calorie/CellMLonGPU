@@ -134,7 +134,7 @@ public abstract class ProgramGenerator {
         m_isTestGenerate = isTestGenerate;
     }
     public void setTestInitFunc(SyntaxFunction testInitFunc) {
-        m_testFunc = testInitFunc;
+        m_testInitFunc = testInitFunc;
     }
     public void setTestFunc(SyntaxFunction testFunc) {
         m_testFunc = testFunc;
@@ -385,6 +385,46 @@ public abstract class ProgramGenerator {
 
         /* if構文を返す */
         return pSynIf;
+    }
+
+    /**
+     * create break
+     * @param pSynControl
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public void createBreak(SyntaxControl pSynControl)
+            throws MathException {
+
+        /* breakを生成 */
+        MathExpression pBreakExp = new MathExpression((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "break"));
+        SyntaxExpression pSynBreak = new SyntaxExpression(pBreakExp);
+
+        /* breakを追加 */
+        pSynControl.addStatement(pSynBreak);
+
+    }
+
+    /**
+     * create continue
+     * @param pControl
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public void createContinue(SyntaxControl pSynControl)
+            throws MathException {
+
+        /* continueを生成 */
+        MathExpression pContinueExp = new MathExpression((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "continue"));
+        SyntaxExpression pSynContinue = new SyntaxExpression(pContinueExp);
+
+        /* continueを追加 */
+        pSynControl.addStatement(pSynContinue);
+
     }
 
     /**

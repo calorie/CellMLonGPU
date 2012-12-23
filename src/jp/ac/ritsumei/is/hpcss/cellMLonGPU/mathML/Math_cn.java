@@ -3,6 +3,7 @@ package jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.exception.MathException;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathMLDefinition.eMathOperand;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathMLDefinition.eMathSepType;
+import jp.ac.ritsumei.is.hpcss.cellMLonGPU.syntax.SyntaxDataType;
 
 /**
  * MathML定数被演算子cnクラス
@@ -11,6 +12,9 @@ public class Math_cn extends MathOperand {
 
 	eMathSepType m_sepType;
 	String m_strSepValue;
+
+	/*キャスト型*/
+	protected SyntaxDataType m_pCastDataType;
 
 	/*-----コンストラクタ-----*/
 	public Math_cn(String strValueString) {
@@ -56,9 +60,26 @@ public class Math_cn extends MathOperand {
 				m_sepType,m_strSepValue);
 	}
 
+	//===================================================
+	//addCastDataType
+	//	関数呼び出しの戻り値キャスト型追加メソッド
+	//
+	//@arg
+	//	SyntaxDataType*		pDataType	: キャスト先のデータ型
+	//
+	//===================================================
+	public void addCastDataType(SyntaxDataType pDataType) {
+		/*キャスト先のデータ型を指定*/
+		m_pCastDataType = pDataType;
+	}
+
 	/*-----文字列変換メソッド-----*/
 	public String toLegalString() throws MathException {
 
+		/*キャスト型が指定されていればキャスト構文追加*/
+		if (m_pCastDataType != null) {
+			m_strPresentText = "(" + m_pCastDataType.toLegalString() + ")" + m_strPresentText;
+		}
 		/*sepが利用される場合*/
 		if(m_strSepValue != null && m_strSepValue.length()!=0){
 

@@ -60,11 +60,12 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
     private static final String COMM_SIZE_MINUS_NUM = "1";
     private static final String MASTER_NODE_NUM = "0";
     private static final String WORKER_START_NUM = "1";
-    private static final String ALLXO_START_NUM = "0";
+    private static final String ALLXO_TEST_NAME = "test_all_xo";
     private static final String MPI_DOUBLE = "MPI_DOUBLE";
     private static final String MPI_XO = "xo";
     private static final String START = "start";
     private static final String END = "end";
+    private static final String TEST_DIFF = "0.0001";
 
 
     /*宣言変数ベクタ*/
@@ -347,7 +348,7 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
         pSynMainFunc.addStatement(this.createMpiInit());
         pSynMainFunc.addStatement(this.createMpiCommSize(pMpiCommSizeIndexVar));
         pSynMainFunc.addStatement(this.createMpiCommRank(pMpiNodeIndexVar));
-        if ( m_isTestGenerate ) pSynMainFunc.addStatement(m_testFunc.callFunction((Math_ci) MathFactory.createOperand(
+        if ( m_isTestGenerate ) pSynMainFunc.addStatement(m_testInitFunc.callFunction((Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, PROG_VAR_STR_ARGV), pMpiNodeIndexVar));
 
         //create if for Decide data size
@@ -680,6 +681,26 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
 
         // j++
         createAssign(allxoLoop, pLoopIndexVar2, createPlus(pLoopIndexVar2, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
+
+        // testCell call loop
+        if ( m_isTestGenerate ) {
+            //create test loop
+            SyntaxControl outputTestLoop = createLoop(
+                    (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"),
+                    (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI,
+                            createTimes(m_pDefinedDataSizeVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN,
+                                    ""+m_pCellMLAnalyzer.getM_vecDiffVar().size())).toLegalString()),
+                                    pLoopIndexVar);
+            //add test loop
+            pSynFor1ForMaster.addStatement(outputTestLoop);
+
+            pMpiAllXoIndexVar.setArrayIndexToBack(pLoopIndexVar);
+            outputTestLoop.addStatement(m_testFunc.callFunction(
+                    (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN, ALLXO_TEST_NAME),
+                    (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI, pMpiAllXoIndexVar.toLegalString()),
+                    (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN, TEST_DIFF)));
+        }
+
 
         //MPI_Send
         //TODO

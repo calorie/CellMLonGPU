@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.exception.MathException;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.exception.SyntaxException;
+import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathFactor;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_ci;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.syntax.SyntaxDeclaration.eDeclarationSpecifier;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.utility.StringUtil;
@@ -350,7 +351,7 @@ public class SyntaxFunction extends Syntax {
 	//	関数コール
 	//
 	//===================================================
-	public SyntaxCallFunction callFunction(Math_ci... pArgVar) {
+	public SyntaxCallFunction callFunction(MathFactor... pArgVar) {
 		/*宣言指定子追加*/
         SyntaxCallFunction pCallFunc =
             new SyntaxCallFunction(m_strFuncName);

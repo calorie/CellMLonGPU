@@ -60,22 +60,10 @@ public class TestFuncGenerator extends ProgramGenerator {
     private static final String TEST_INIT_FUNC_NAME = "testInit";
     private static final String TEST_FUNC_NAME = "testCell";
     private static final String FILE_NAME = "fileName";
-    private static final String STRLEN_FUNC_NAME = "strlen";
     private static final String DATA_PLACE_NAME = "\"data/node.dat\"";
     private static final String DATA_PLACE_NAME_EACH_NODE = "\"data/node%d.dat\"";
-    private static final String EXIT_FUNC_NAME = "exit";
-    private static final String EXIT_FAILURE_NAME = "EXIT_FAILURE";
-    private static final String SPRINTF_FUNC_NAME = "sprintf";
-    private static final String FPRINTF_FUNC_NAME = "fprintf";
-    private static final String HCREATE_FUNC_NAME = "hcreate";
-    private static final String STRDUP_FUNC_NAME = "strdup";
-    private static final String HSEARCH_FUNC_NAME = "hsearch";
-    private static final String FSEEK_FUNC_NAME = "fseek";
-    private static final String SIZEOF_FUNC_NAME = "sizeof";
-    private static final String FGETS_FUNC_NAME = "fgets";
     private static final String WRITE_MODE = "\'w\'";
     private static final String TEST_MODE = "\'t\'";
-    private static final String FOPEN_FUNC_NAME = "fopen";
     private static final String TEST_NAME = "testName";
     private static final String CELL_NAME = "cell";
     private static final String DIFF_NAME = "diff";
@@ -86,6 +74,9 @@ public class TestFuncGenerator extends ProgramGenerator {
     private static final String HASH_MODE_FIND = "FIND";
     private static final String HASH_MODE_ENTER = "ENTER";
     private static final String SEEK_SET = "SEEK_SET";
+    private Math_cn Math_cn_0 = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0");
+    private Math_cn Math_cn_1 = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1");
+    private Math_cn Math_cn_null = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "NULL");
 
     private SyntaxProgram t_pSynProgram;
 
@@ -320,7 +311,7 @@ public class TestFuncGenerator extends ProgramGenerator {
         Math_ci pTestNameArgVar = (Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, TEST_NAME);
         SyntaxDeclaration pSynArgTestName = this.createArg(eDataType.DT_CHAR, 1, pTestNameArgVar);
-        // arg : douvle cell 
+        // arg : douvle cell
         Math_ci pCellArgVar = (Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, CELL_NAME);
         SyntaxDeclaration pSynArgCell = this.createArg(eDataType.DT_DOUBLE, 0, pCellArgVar);
@@ -364,7 +355,11 @@ public class TestFuncGenerator extends ProgramGenerator {
         // hcreate(TEST_NUM);
         pSynIfOpEqualT.addStatement(createHcreate(t_pDefinedTestMaxVar));
         // e.key = strdup(testName);
-        createAssign(pSynIfOpEqualT, t_pHashEntry, (Math_ci) MathFactory.createOperand(
+        Math_ci t_pHashEntryWithKey = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, HASH_ENTRY_NAME);
+        t_pHashEntryWithKey.addMemberVar((Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, "key"));
+        createAssign(pSynIfOpEqualT, t_pHashEntryWithKey, (Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, createStrdup(pTestNameArgVar).toLegalStringWithNoSemicolon()));
         // ep = hsearch(e, FIND);
         createAssign(pSynIfOpEqualT, t_pHashEntryPointer, (Math_ci) MathFactory.createOperand(
@@ -382,11 +377,30 @@ public class TestFuncGenerator extends ProgramGenerator {
 
         // (int)(ep->data) = (int)(ep->data) + 1;
         // cnt = (int)(ep->data);
-
-        //create else 
+        Math_ci t_pHashEntryPointerWithData = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, HASH_ENTRY_POINTER_NAME);
+        Math_ci pStrData = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, "data");
+        t_pHashEntryPointerWithData.addMemberVar(pStrData);
+        t_pHashEntryPointerWithData.setArrowOperaor();
+        SyntaxDataType pSynIntType = new SyntaxDataType(
+                eDataType.DT_INT, 0);
+        t_pHashEntryPointerWithData.addCastDataType(pSynIntType);
+        createAssign(pSynIfEpEqualTrue, t_pHashEntryPointerWithData, createPlus(t_pHashEntryPointerWithData, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
+;
+        //create else
         SyntaxControl pSynIfEpNotEqualTrue = createElse();
         //add else
         pSynIfOpEqualT.addStatement(pSynIfEpNotEqualTrue);
+        // e.data = (void *)1
+        Math_ci t_pHashEntryWithData = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, HASH_ENTRY_NAME);
+        t_pHashEntryWithData.addMemberVar(pStrData);
+        SyntaxDataType pSynPVoidType = new SyntaxDataType(
+                eDataType.DT_VOID, 1);
+        Math_cn MathCn1WithVoidPointer = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1");
+        MathCn1WithVoidPointer.addCastDataType(pSynPVoidType);
+        createAssign(pSynIfEpNotEqualTrue, t_pHashEntryWithData, MathCn1WithVoidPointer);
         // ep = hsearch(e, ENTER);
         createAssign(pSynIfEpNotEqualTrue, t_pHashEntryPointer, (Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, createHsearch(t_pHashEntry, HASH_MODE_ENTER).toLegalStringWithNoSemicolon()));
@@ -396,13 +410,64 @@ public class TestFuncGenerator extends ProgramGenerator {
 
         // while
         Math_cn condFgets = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "NULL");
+        Math_ci pBuffVarWithNoArrayIndex = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, BUFF_NAME);
         Math_ci pSizeofBuff = (Math_ci) MathFactory.createOperand(
-                eMathOperand.MOPD_CI, createSizeof(pBuffVar).toLegalStringWithNoSemicolon());
+                eMathOperand.MOPD_CI, createSizeof(pBuffVarWithNoArrayIndex).toLegalStringWithNoSemicolon());
         Math_ci pSynFgets = (Math_ci) MathFactory.createOperand(
-                eMathOperand.MOPD_CI, createFgets(pBuffVar, pSizeofBuff, t_pFilePointer).toLegalStringWithNoSemicolon());
+                eMathOperand.MOPD_CI, createFgets(pBuffVarWithNoArrayIndex, pSizeofBuff, t_pFilePointer).toLegalStringWithNoSemicolon());
+        pMathNeq = (Math_neq)MathFactory.createOperator(eMathOperator.MOP_NEQ);
         MathFactor pSynWhileCond = createCondition(pSynFgets, condFgets, pMathNeq);
         SyntaxControl pSynWhile = createWhile(pSynWhileCond);
         pSynIfOpEqualT.addStatement(pSynWhile);
+
+        // sscanf
+        Math_ci pFCellVarWithPointer = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, F_CELL_NAME);
+        pFCellVarWithPointer.setPointerNum(-1);
+        pSynWhile.addStatement(createSscanf(pBuffVarWithNoArrayIndex, "\"%lf%s\"", pFCellVarWithPointer, pTagVar));
+
+        // create if for search testname
+        //create cond
+        pMathEq = (Math_eq)MathFactory.createOperator(eMathOperator.MOP_EQ);
+        Math_ci pSynStrcmp = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, createStrcmp(pTagVar, pTestNameArgVar).toLegalStringWithNoSemicolon());
+        pSynIfCond = createCondition(pSynStrcmp, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"), pMathEq);
+        //create if
+        SyntaxControl pSynIfTagEqualFilename = createIf(pSynIfCond);
+        //add if
+        pSynWhile.addStatement(pSynIfTagEqualFilename);
+
+        // create if for search testname
+        //create cond
+        pMathNeq = (Math_neq)MathFactory.createOperator(eMathOperator.MOP_NEQ);
+        pSynIfCond = createCondition(pCntVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"), pMathNeq);
+        //create if
+        SyntaxControl pSynIfCntNotEqual0 = createIf(pSynIfCond);
+        //add if
+        pSynIfTagEqualFilename.addStatement(pSynIfCntNotEqual0);
+        pSynIfOpEqualT.addStatement(pSynWhile);
+
+        // cnt--;
+        createAssign(pSynIfCntNotEqual0, pCntVar, createMinus(pCntVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
+        // continue;
+        createContinue(pSynIfCntNotEqual0);
+
+        // create if for assert cell
+        //create cond
+        Math_lt pMathLt = (Math_lt)MathFactory.createOperator(eMathOperator.MOP_LT);
+        Math_ci pSynFabs = (Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, createFabs((Math_ci) MathFactory.createOperand(
+                eMathOperand.MOPD_CI, createMinus(pCellArgVar, pFCellVar).toLegalString())).toLegalStringWithNoSemicolon());
+        pSynIfCond = createCondition(pSynFabs, pDiffArgVar, pMathLt);
+        //create if
+        SyntaxControl pSynIfAssertCell = createIf(pSynIfCond);
+        //add if
+        pSynIfTagEqualFilename.addStatement(pSynIfAssertCell);
+        // success printf
+        pSynIfAssertCell.addStatement(createPrintf("\"\\x1b[31m %s fail | input=%lf : file=%lf\\n\"", pTestNameArgVar, pCellArgVar, pFCellVar));
+
+        createBreak(pSynIfTagEqualFilename);
 
         //create elseif equal w
         Math_cn condW = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, WRITE_MODE);
@@ -424,7 +489,7 @@ public class TestFuncGenerator extends ProgramGenerator {
 
     public SyntaxCallFunction createSizeof(Math_ci sizeofArg) throws MathException {
         SyntaxCallFunction pSynSizeof =
-                new SyntaxCallFunction(SIZEOF_FUNC_NAME);
+                new SyntaxCallFunction("sizeof");
         pSynSizeof.addArgFactor(sizeofArg);
 
         return pSynSizeof;
@@ -443,22 +508,22 @@ public class TestFuncGenerator extends ProgramGenerator {
     }
     private SyntaxCallFunction createStrlen(Math_ci pStr) {
         SyntaxCallFunction pSynStrlenCall =
-            new SyntaxCallFunction(STRLEN_FUNC_NAME);
+            new SyntaxCallFunction("strlen");
         pSynStrlenCall.addArgFactor(pStr);
 
         return pSynStrlenCall;
     }
     private SyntaxCallFunction createExit() throws MathException {
         SyntaxCallFunction pSynExitCall =
-            new SyntaxCallFunction(EXIT_FUNC_NAME);
+            new SyntaxCallFunction("exit");
         pSynExitCall.addArgFactor((Math_ci) MathFactory.createOperand(
-                eMathOperand.MOPD_CI, EXIT_FAILURE_NAME));
+                eMathOperand.MOPD_CI, "EXIT_FAILURE"));
 
         return pSynExitCall;
     }
     private SyntaxCallFunction createSprintf(Math_ci fileNameBuff, Math_ci node) throws MathException {
         SyntaxCallFunction pSynSprintfCall =
-                new SyntaxCallFunction(SPRINTF_FUNC_NAME);
+                new SyntaxCallFunction("sprintf");
         pSynSprintfCall.addArgFactor(fileNameBuff);
         pSynSprintfCall.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, DATA_PLACE_NAME_EACH_NODE));
         pSynSprintfCall.addArgFactor(node);
@@ -467,7 +532,7 @@ public class TestFuncGenerator extends ProgramGenerator {
     }
     private SyntaxCallFunction createFprintfCall(Math_ci filePointer, String rowString, Math_ci... args) throws MathException {
         SyntaxCallFunction pSynFprintfCall =
-                new SyntaxCallFunction(FPRINTF_FUNC_NAME);
+                new SyntaxCallFunction("fprintf");
         pSynFprintfCall.addArgFactor(filePointer);
         pSynFprintfCall.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, rowString));
         for (int i=0; i < args.length; i++){
@@ -478,7 +543,7 @@ public class TestFuncGenerator extends ProgramGenerator {
     }
     private SyntaxCallFunction createFopen(Math_ci fileName, String fileMode) throws MathException {
         SyntaxCallFunction pSynFopenCall =
-                new SyntaxCallFunction(FOPEN_FUNC_NAME);
+                new SyntaxCallFunction("fopen");
         pSynFopenCall.addArgFactor(fileName);
         pSynFopenCall.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, fileMode));
 
@@ -486,21 +551,21 @@ public class TestFuncGenerator extends ProgramGenerator {
     }
     private SyntaxCallFunction createHcreate(Math_ci testMaxNum) throws MathException {
         SyntaxCallFunction pSynHcreate =
-                new SyntaxCallFunction(HCREATE_FUNC_NAME);
+                new SyntaxCallFunction("hcreate");
         pSynHcreate.addArgFactor(testMaxNum);
 
         return pSynHcreate;
     }
     private SyntaxCallFunction createStrdup(Math_ci testName) throws MathException {
         SyntaxCallFunction pSynStrdup =
-                new SyntaxCallFunction(STRDUP_FUNC_NAME);
+                new SyntaxCallFunction("strdup");
         pSynStrdup.addArgFactor(testName);
 
         return pSynStrdup;
     }
     private SyntaxCallFunction createHsearch(Math_ci entryVar, String hashMode) throws MathException {
         SyntaxCallFunction pSynHsearch =
-                new SyntaxCallFunction(HSEARCH_FUNC_NAME);
+                new SyntaxCallFunction("hsearch");
         pSynHsearch.addArgFactor(entryVar);
         pSynHsearch.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, hashMode));
 
@@ -508,7 +573,7 @@ public class TestFuncGenerator extends ProgramGenerator {
     }
     private SyntaxCallFunction createFseek(Math_ci filePointer) throws MathException {
         SyntaxCallFunction pSynHsearch =
-                new SyntaxCallFunction(FSEEK_FUNC_NAME);
+                new SyntaxCallFunction("fseek");
         pSynHsearch.addArgFactor(filePointer);
         pSynHsearch.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0L"));
         pSynHsearch.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, SEEK_SET));
@@ -517,11 +582,47 @@ public class TestFuncGenerator extends ProgramGenerator {
     }
     private SyntaxCallFunction createFgets(Math_ci buff, Math_ci buffSize, Math_ci filePointer) throws MathException {
         SyntaxCallFunction pSynFgets =
-                new SyntaxCallFunction(FGETS_FUNC_NAME);
+                new SyntaxCallFunction("fgets");
         pSynFgets.addArgFactor(buff);
         pSynFgets.addArgFactor(buffSize);
         pSynFgets.addArgFactor(filePointer);
 
         return pSynFgets;
+    }
+    private SyntaxCallFunction createSscanf(Math_ci buff, String rowString, Math_ci... args) throws MathException {
+        SyntaxCallFunction pSynSscanfCall =
+                new SyntaxCallFunction("sscanf");
+        pSynSscanfCall.addArgFactor(buff);
+        pSynSscanfCall.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, rowString));
+        for (int i=0; i < args.length; i++){
+            pSynSscanfCall.addArgFactor(args[i]);
+        }
+
+        return pSynSscanfCall;
+    }
+    private SyntaxCallFunction createStrcmp(Math_ci str1, Math_ci str2) throws MathException {
+        SyntaxCallFunction pSynStrcmp =
+                new SyntaxCallFunction("strcmp");
+        pSynStrcmp.addArgFactor(str1);
+        pSynStrcmp.addArgFactor(str2);
+
+        return pSynStrcmp;
+    }
+    private SyntaxCallFunction createFabs(Math_ci fabsArg) throws MathException {
+        SyntaxCallFunction pSynFabs =
+                new SyntaxCallFunction("fabs");
+        pSynFabs.addArgFactor(fabsArg);
+
+        return pSynFabs;
+    }
+    private SyntaxCallFunction createPrintf(String printString, Math_ci... args) throws MathException {
+        SyntaxCallFunction pSynPrintfCall =
+                new SyntaxCallFunction("printf");
+        pSynPrintfCall.addArgFactor((Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, printString));
+        for (int i=0; i < args.length; i++){
+            pSynPrintfCall.addArgFactor(args[i]);
+        }
+
+        return pSynPrintfCall;
     }
 }

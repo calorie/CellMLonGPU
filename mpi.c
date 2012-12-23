@@ -4,9 +4,150 @@
 #include"mpi.h"
 #define __DATA_NUM 1024
 #define MASTER 0
+#include<string.h>
+#include<search.h>
+#define BUFF_MAX 100
+#define TEST_MAX 10
 
+FILE* fp;
+ENTRY e;
+ENTRY* ep;
+char op;
 
+void testInit ( char** argv , int node ) ;
+void testCell ( char* testName , double cell , double diff ) ;
 int main ( int argc , char** argv ) ;
+
+void testInit ( char** argv , int node ) {
+
+	char* fileName;
+
+	fileName = (char*)malloc (  ( sizeof( char ) *  ( strlen ( "data/node.dat" ) + sizeof( char ) )  )  );
+	if( ( argv[1] != NULL ) ){
+
+		*argv =  ( *argv + 1 ) ;
+		if( ( **argv == '-' ) ){
+
+			op = * ( *argv + 1 ) ;
+			if( ( op == 't' ) ){
+
+				sprintf ( fileName , "data/node%d.dat" , node ) ;
+				fp = fopen ( fileName , "r" );
+
+			}
+
+			else if( ( op == 'w' ) ){
+
+				sprintf ( fileName , "data/node%d.dat" , node ) ;
+				fp = fopen ( fileName , "w" );
+
+			}
+
+			else{
+
+				exit ( EXIT_FAILURE ) ;
+
+			}
+
+
+		}
+
+
+	}
+
+	free ( fileName ) ;
+}
+
+
+void testCell ( char* testName , double cell , double diff ) {
+
+	char* tag;
+	char buff[BUFF_MAX];
+	int cnt = 0;
+	double f_cell;
+
+	tag = (char*)malloc (  ( sizeof( char ) *  ( BUFF_MAX - sizeof( double ) )  )  );
+	if( ( op == 't' ) ){
+
+		hcreate ( TEST_MAX ) ;
+		e.key = strdup ( testName );
+		ep = hsearch ( e , FIND );
+		if( ( ep != NULL ) ){
+
+			(int)( ep->data ) =  ( (int)( ep->data ) + 1 ) ;
+
+		}
+
+		else{
+
+			e.data = (void*)1;
+			ep = hsearch ( e , ENTER );
+
+		}
+
+		fseek ( fp , 0L , SEEK_SET ) ;
+		while( ( fgets ( buff , sizeof ( buff ) , fp ) != NULL ) ){
+
+			sscanf ( buff , "%lf%s" , &f_cell , tag ) ;
+			if( ( strcmp ( tag , testName ) == 0 ) ){
+
+				if( ( cnt != 0 ) ){
+
+					cnt =  ( cnt - 1 ) ;
+					continue;
+
+				}
+
+				if( ( fabs (  ( cell - f_cell )  ) < diff ) ){
+
+					printf ( "\x1b[31m %s fail | input=%lf : file=%lf\n" , testName , cell , f_cell ) ;
+
+				}
+
+				break;
+
+			}
+
+
+		}
+
+		while( ( fgets ( buff , sizeof ( buff ) , fp ) != NULL ) ){
+
+			sscanf ( buff , "%lf%s" , &f_cell , tag ) ;
+			if( ( strcmp ( tag , testName ) == 0 ) ){
+
+				if( ( cnt != 0 ) ){
+
+					cnt =  ( cnt - 1 ) ;
+					continue;
+
+				}
+
+				if( ( fabs (  ( cell - f_cell )  ) < diff ) ){
+
+					printf ( "\x1b[31m %s fail | input=%lf : file=%lf\n" , testName , cell , f_cell ) ;
+
+				}
+
+				break;
+
+			}
+
+
+		}
+
+
+	}
+
+	else if( ( op == 'w' ) ){
+
+		fprintf ( fp , "%lf%s\n" , cell , testName ) ;
+
+	}
+
+	free ( tag ) ;
+}
+
 
 int main ( int argc , char** argv ) {
 
@@ -46,6 +187,7 @@ int main ( int argc , char** argv ) {
 	MPI_Init ( &argc , &argv ) ;
 	MPI_Comm_size ( MPI_COMM_WORLD , &comm_size ) ;
 	MPI_Comm_rank ( MPI_COMM_WORLD , &node ) ;
+	testInit ( argv , node ) ;
 	if( ( comm_size < 3 ) ){
 
 		__MASTER_DATA_NUM =  ( __DATA_NUM / comm_size ) ;
@@ -326,6 +468,12 @@ int main ( int argc , char** argv ) {
 
 				}
 
+
+			}
+
+			for(__i = 0; ( __i <  ( __DATA_NUM * 8 )  ) ;__i++){
+
+				testCell ( test_all_xo , all_xo[__i] , 0.0001 ) ;
 
 			}
 

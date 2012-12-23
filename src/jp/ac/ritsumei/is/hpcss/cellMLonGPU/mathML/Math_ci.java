@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.exception.MathException;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathMLDefinition.eMathOperand;
+import jp.ac.ritsumei.is.hpcss.cellMLonGPU.syntax.SyntaxDataType;
 
 /**
  * MathML変数被演算子ciクラス
@@ -13,19 +14,31 @@ public class Math_ci extends MathOperand {
     /*配列インデックス*/
     Vector<MathFactor> m_vecArrayIndexFactor;
 
+    /*メンバ変数*/
+    Vector<MathFactor> m_vecMemberVarFactor;
+    /*trueならドット演算子、falseならアロー演算子*/
+    Boolean m_isDot;
+
     /*ポインタ演算子数(マイナスの場合は&演算子)*/
     int m_nPointerNum;
+
+	/*キャスト型*/
+	protected SyntaxDataType m_pCastDataType;
 
     /*-----コンストラクタ-----*/
     public Math_ci(String strVariableName,double dValue) {
         super(strVariableName, dValue, eMathOperand.MOPD_CI);
         m_vecArrayIndexFactor = new Vector<MathFactor>();
+        m_vecMemberVarFactor = new Vector<MathFactor>();
         m_nPointerNum = 0;
+        m_isDot = true;
     }
     public Math_ci(String strVariableName) {
         super(strVariableName, eMathOperand.MOPD_CI);
         m_vecArrayIndexFactor = new Vector<MathFactor>();
+        m_vecMemberVarFactor= new Vector<MathFactor>();
         m_nPointerNum = 0;
+        m_isDot = true;
     }
 
     /*-----値設定メソッド-----*/
@@ -96,12 +109,41 @@ public class Math_ci extends MathOperand {
         m_nPointerNum = nPointerNum;
     }
 
+    /*-----メンバ変数追加メソッド-----*/
+    public void addMemberVar(MathFactor pFactor){
+
+        /*オペランドをベクタに追加*/
+        m_vecMemberVarFactor.add(pFactor);
+    }
+    /*-----アロー演算子-----*/
+    public void setArrowOperaor(){
+        m_isDot = false;
+    }
+
+	//===================================================
+	//addCastDataType
+	//	関数呼び出しの戻り値キャスト型追加メソッド
+	//
+	//@arg
+	//	SyntaxDataType*		pDataType	: キャスト先のデータ型
+	//
+	//===================================================
+	public void addCastDataType(SyntaxDataType pDataType) {
+		/*キャスト先のデータ型を指定*/
+		m_pCastDataType = pDataType;
+	}
+
     /*-----文字列変換メソッド-----*/
     public String toLegalString() throws MathException {
 
-        /*ポインタ演算子の追加*/
         String strVariable = "";
 
+		/*キャスト型が指定されていればキャスト構文追加*/
+		if (m_pCastDataType != null) {
+			strVariable += "(" + m_pCastDataType.toLegalString() + ")( ";
+		}
+
+        /*ポインタ演算子の追加*/
         if(m_nPointerNum<0){
             strVariable += "&";
         }
@@ -119,6 +161,17 @@ public class Math_ci extends MathOperand {
             /*項を追加*/
             strVariable += "[" + it.toLegalString() + "]";
         }
+
+        /*メンバ変数の追加*/
+        String strOp = (m_isDot)? ".": "->";
+        for (MathFactor it: m_vecMemberVarFactor) {
+            /*項を追加*/
+            strVariable += strOp + it.toLegalString();
+        }
+
+		if (m_pCastDataType != null) {
+			strVariable += " )";
+		}
 
         return strVariable;
     }
