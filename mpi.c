@@ -2,11 +2,135 @@
 #include<stdlib.h>
 #include<math.h>
 #include"mpi.h"
-#define __DATA_NUM 1024
+#define __DATA_NUM 32
 #define MASTER 0
+#include<string.h>
+#include<search.h>
+#include<sys/stat.h>
+#define BUFF_MAX 100
+#define TEST_MAX 20
 
+FILE* fp;
+ENTRY e;
+ENTRY* ep;
+char op;
 
+void testInit ( char** argv , int node ) ;
+void testCell ( char* testName , double cell , double diff ) ;
 int main ( int argc , char** argv ) ;
+
+void testInit ( char** argv , int node ) {
+
+	char* fileName;
+
+	fileName = (char*)malloc (  ( sizeof( char ) *  ( strlen ( "data/node.dat" ) + sizeof( char ) )  )  );
+	if( ( argv[1] != NULL ) ){
+
+		*argv++;
+		if( ( **argv == '-' ) ){
+
+			op = * ( *argv + 1 ) ;
+			if( ( op == 't' ) ){
+
+				sprintf ( fileName , "data/node%d.dat" , node ) ;
+				fp = fopen ( fileName , "r" );
+
+			}
+
+			else if( ( op == 'w' ) ){
+
+				mkdir ( "./data" , 0777 ) ;
+				sprintf ( fileName , "data/node%d.dat" , node ) ;
+				fp = fopen ( fileName , "w" );
+
+			}
+
+			else{
+
+				exit ( EXIT_FAILURE ) ;
+
+			}
+
+
+		}
+
+
+	}
+
+	free ( fileName ) ;
+}
+
+
+void testCell ( char* testName , double cell , double diff ) {
+
+	char* tag;
+	char buff[BUFF_MAX];
+	int cnt = 0;
+	double f_cell;
+
+	tag = (char*)malloc (  ( sizeof( char ) *  ( BUFF_MAX - sizeof( double ) )  )  );
+	if( ( op == 't' ) ){
+
+		hcreate ( TEST_MAX ) ;
+		e.key = strdup ( testName );
+		ep = hsearch ( e , FIND );
+		if( ( ep != NULL ) ){
+
+			cnt = (int)( ep->data )++;
+
+		}
+
+		else{
+
+			e.data = (void*)1;
+			ep = hsearch ( e , ENTER );
+
+		}
+
+		fseek ( fp , 0L , SEEK_SET ) ;
+		while( ( fgets ( buff , sizeof ( buff ) , fp ) != NULL ) ){
+
+			sscanf ( buff , "%lf%s" , &f_cell , tag ) ;
+			if( ( strcmp ( tag , testName ) == 0 ) ){
+
+				if( ( cnt != 0 ) ){
+
+					cnt--;
+					continue;
+
+				}
+
+				if( ( fabs (  ( cell - f_cell )  ) <= diff ) ){
+
+					printf ( "\x1b[32m %s success\n" , testName ) ;
+
+				}
+
+				else{
+
+					printf ( "\x1b[31m %s fail | input=%lf : file=%lf\n" , testName , cell , f_cell ) ;
+
+				}
+
+				break;
+
+			}
+
+
+		}
+
+
+	}
+
+	else if( ( op == 'w' ) ){
+
+		fprintf ( fp , "%lf%s\n" , cell , testName ) ;
+
+	}
+
+	free ( tag ) ;
+}
+
 
 int main ( int argc , char** argv ) {
 
@@ -46,6 +170,7 @@ int main ( int argc , char** argv ) {
 	MPI_Init ( &argc , &argv ) ;
 	MPI_Comm_size ( MPI_COMM_WORLD , &comm_size ) ;
 	MPI_Comm_rank ( MPI_COMM_WORLD , &node ) ;
+	testInit ( argv , node ) ;
 	if( ( comm_size < 3 ) ){
 
 		__MASTER_DATA_NUM =  ( __DATA_NUM / comm_size ) ;
@@ -82,7 +207,7 @@ int main ( int argc , char** argv ) {
 		k3 = (double*)malloc (  ( sizeof( double ) *  ( 8 * __MASTER_DATA_NUM )  )  ) ;;
 		k4 = (double*)malloc (  ( sizeof( double ) *  ( 8 * __MASTER_DATA_NUM )  )  ) ;;
 		z = (double*)malloc (  ( sizeof( double ) * 18 )  ) ;;
-		for(t = 0.000000; ( t <= 400.000000 ) ;t =  ( t + d ) ){
+		for(t = 0.000000; ( t <= 0.100000 ) ;t =  ( t + d ) ){
 
 			for(__i = 0; ( __i < __MASTER_DATA_NUM ) ;__i++){
 
@@ -329,6 +454,14 @@ int main ( int argc , char** argv ) {
 
 			}
 
+			testCell ( "test_all_xo0" , all_xo[ ( __DATA_NUM * 0 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo1" , all_xo[ ( __DATA_NUM * 1 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo2" , all_xo[ ( __DATA_NUM * 2 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo3" , all_xo[ ( __DATA_NUM * 3 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo4" , all_xo[ ( __DATA_NUM * 4 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo5" , all_xo[ ( __DATA_NUM * 5 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo6" , all_xo[ ( __DATA_NUM * 6 ) ] , 0.0001 ) ;
+			testCell ( "test_all_xo7" , all_xo[ ( __DATA_NUM * 7 ) ] , 0.0001 ) ;
 
 		}
 
@@ -371,7 +504,7 @@ int main ( int argc , char** argv ) {
 		k3 = (double*)malloc (  ( sizeof( double ) *  ( 8 * __DATA_NUM )  )  ) ;;
 		k4 = (double*)malloc (  ( sizeof( double ) *  ( 8 * __DATA_NUM )  )  ) ;;
 		z = (double*)malloc (  ( sizeof( double ) * 18 )  ) ;;
-		for(t = 0.000000; ( t <= 400.000000 ) ;t =  ( t + d ) ){
+		for(t = 0.000000; ( t <= 0.100000 ) ;t =  ( t + d ) ){
 
 			for(__i = start; ( __i < end ) ;__i++){
 

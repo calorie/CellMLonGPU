@@ -17,6 +17,7 @@ import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.MathOperator;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_assign;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_ci;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_cn;
+import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_dec;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_divide;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_exp;
 import jp.ac.ritsumei.is.hpcss.cellMLonGPU.mathML.Math_inc;
@@ -1119,6 +1120,25 @@ public abstract class ProgramGenerator {
     }
 
     /**
+     * create pFirstVar --
+     * @param pFirstVar
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public Math_dec createDec(MathFactor pDecVar)
+            throws MathException {
+
+        Math_dec pMathDec =
+                (Math_dec)MathFactory.createOperator(eMathOperator.MOP_DEC);
+
+        pMathDec.addFactor(pDecVar);
+
+        return pMathDec;
+    }
+
+    /**
      * create pFirstVar ++
      * @param pFirstVar
      * @return
@@ -1130,6 +1150,23 @@ public abstract class ProgramGenerator {
             throws MathException {
 
         MathExpression pNewExpression = new MathExpression(createInc(pIncVar));
+        SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
+        pSynControl.addStatement(pNewSynExpression);
+
+    }
+
+    /**
+     * create pFirstVar --
+     * @param pFirstVar
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public void createDecExp(SyntaxControl pSynControl, MathFactor pDecVar)
+            throws MathException {
+
+        MathExpression pNewExpression = new MathExpression(createDec(pDecVar));
         SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
         pSynControl.addStatement(pNewSynExpression);
 
