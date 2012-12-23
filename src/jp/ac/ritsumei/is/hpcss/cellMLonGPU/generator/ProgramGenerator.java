@@ -132,6 +132,8 @@ public abstract class ProgramGenerator {
      */
     public void setIsTestGenerate(Boolean isTestGenerate) {
         m_isTestGenerate = isTestGenerate;
+        m_unElementNum = 32;
+        m_dEndTime = 0.100000;
     }
     public void setTestInitFunc(SyntaxFunction testInitFunc) {
         m_testInitFunc = testInitFunc;
@@ -1075,7 +1077,7 @@ public abstract class ProgramGenerator {
     }
 
     /**
-     * create pFirstVar + pSecondVar
+     * create pFirstVar % pSecondVar
      * @param pFirstVar
      * @param pSecondVar
      * @return
@@ -1093,6 +1095,42 @@ public abstract class ProgramGenerator {
         pMathRemainder.addFactor(pSecondVar);
 
         return pMathRemainder;
+    }
+
+    /**
+     * create pFirstVar ++
+     * @param pFirstVar
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public Math_inc createInc(MathFactor pIncVar)
+            throws MathException {
+
+        Math_inc pMathInc =
+                (Math_inc)MathFactory.createOperator(eMathOperator.MOP_INC);
+
+        pMathInc.addFactor(pIncVar);
+
+        return pMathInc;
+    }
+
+    /**
+     * create pFirstVar ++
+     * @param pFirstVar
+     * @return
+     * @throws MathException
+     *
+     * @author Yuu Shigetani
+     */
+    public void createIncExp(SyntaxControl pSynControl, MathFactor pIncVar)
+            throws MathException {
+
+        MathExpression pNewExpression = new MathExpression(createInc(pIncVar));
+        SyntaxExpression pNewSynExpression = new SyntaxExpression(pNewExpression);
+        pSynControl.addStatement(pNewSynExpression);
+
     }
 
 }

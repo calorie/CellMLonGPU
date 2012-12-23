@@ -229,7 +229,7 @@ public class TestFuncGenerator extends ProgramGenerator {
         Math_ci pArgvWithOnePointer = (Math_ci) MathFactory.createOperand(
                 eMathOperand.MOPD_CI, PROG_VAR_STR_ARGV);
         pArgvWithOnePointer.setPointerNum(1);
-        createAssign(pSynIfOpNotNull, pArgvWithOnePointer, createPlus(pArgvWithOnePointer, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
+        createIncExp(pSynIfOpNotNull, pArgvWithOnePointer);
 
         //create if option equal hyphen
         Math_cn condHyphen = (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "\'-\'");
@@ -386,7 +386,7 @@ public class TestFuncGenerator extends ProgramGenerator {
         SyntaxDataType pSynIntType = new SyntaxDataType(
                 eDataType.DT_INT, 0);
         t_pHashEntryPointerWithData.addCastDataType(pSynIntType);
-        createAssign(pSynIfEpEqualTrue, t_pHashEntryPointerWithData, createPlus(t_pHashEntryPointerWithData, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
+        createAssign(pSynIfEpEqualTrue, pCntVar, createInc(t_pHashEntryPointerWithData));
 ;
         //create else
         SyntaxControl pSynIfEpNotEqualTrue = createElse();
@@ -446,7 +446,6 @@ public class TestFuncGenerator extends ProgramGenerator {
         SyntaxControl pSynIfCntNotEqual0 = createIf(pSynIfCond);
         //add if
         pSynIfTagEqualFilename.addStatement(pSynIfCntNotEqual0);
-        pSynIfOpEqualT.addStatement(pSynWhile);
 
         // cnt--;
         createAssign(pSynIfCntNotEqual0, pCntVar, createMinus(pCntVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
@@ -462,10 +461,14 @@ public class TestFuncGenerator extends ProgramGenerator {
         pSynIfCond = createCondition(pSynFabs, pDiffArgVar, pMathLt);
         //create if
         SyntaxControl pSynIfAssertCell = createIf(pSynIfCond);
+        SyntaxControl pSynElseAssertCell = createElse();
         //add if
         pSynIfTagEqualFilename.addStatement(pSynIfAssertCell);
+        //add else
+        pSynIfTagEqualFilename.addStatement(pSynElseAssertCell);
         // success printf
-        pSynIfAssertCell.addStatement(createPrintf("\"\\x1b[31m %s fail | input=%lf : file=%lf\\n\"", pTestNameArgVar, pCellArgVar, pFCellVar));
+        pSynIfAssertCell.addStatement(createPrintf("\"\\x1b[32m %s success\\n\"", pTestNameArgVar));
+        pSynElseAssertCell.addStatement(createPrintf("\"\\x1b[31m %s fail | input=%lf : file=%lf\\n\"", pTestNameArgVar, pCellArgVar, pFCellVar));
 
         createBreak(pSynIfTagEqualFilename);
 

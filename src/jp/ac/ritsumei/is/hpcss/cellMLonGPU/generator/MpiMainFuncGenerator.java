@@ -682,23 +682,16 @@ public class MpiMainFuncGenerator extends MpiProgramGenerator {
         // j++
         createAssign(allxoLoop, pLoopIndexVar2, createPlus(pLoopIndexVar2, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "1")));
 
-        // testCell call loop
+        // testCell call
         if ( m_isTestGenerate ) {
-            //create test loop
-            SyntaxControl outputTestLoop = createLoop(
-                    (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, "0"),
-                    (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI,
-                            createTimes(m_pDefinedDataSizeVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN,
-                                    ""+m_pCellMLAnalyzer.getM_vecDiffVar().size())).toLegalString()),
-                                    pLoopIndexVar);
-            //add test loop
-            pSynFor1ForMaster.addStatement(outputTestLoop);
 
-            pMpiAllXoIndexVar.setArrayIndexToBack(pLoopIndexVar);
-            outputTestLoop.addStatement(m_testFunc.callFunction(
-                    (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN, ALLXO_TEST_NAME),
-                    (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI, pMpiAllXoIndexVar.toLegalString()),
-                    (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN, TEST_DIFF)));
+            for (int i = 0; i < m_pCellMLAnalyzer.getM_vecDiffVar().size(); i++) {
+                pMpiAllXoIndexVar.setArrayIndexToBack(createTimes(m_pDefinedDataSizeVar, (Math_cn)MathFactory.createOperand(eMathOperand.MOPD_CN, ""+i)));
+                pSynFor1ForMaster.addStatement(m_testFunc.callFunction(
+                        (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN, "\""+ALLXO_TEST_NAME+i+"\""),
+                        (Math_ci)MathFactory.createOperand(eMathOperand.MOPD_CI, pMpiAllXoIndexVar.toLegalString()),
+                        (Math_cn) MathFactory.createOperand(eMathOperand.MOPD_CN, TEST_DIFF)));
+            }
         }
 
 
