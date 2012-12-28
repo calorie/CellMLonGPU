@@ -12,3 +12,4 @@ initialize.txt
 relation.txt
 mpi.c
 bin/*
+codes/*
