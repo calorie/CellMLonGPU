@@ -1,9 +1,9 @@
 CellMLonGPU
 ===========
 
-* CellMLonGPU ver.1.0 for mpi
+## CellMLonGPU ver.1.0 for mpi
 
-** build
+### build
 
 ```
 $ cd /path/to/project/root
