@@ -10,6 +10,6 @@ tags
 # build.xml
 initialize.txt
 relation.txt
-mpi.c
+simulation.c
 bin/*
 codes/*

@@ -5,6 +5,10 @@
     <property name="type" value="mpi"/>
     <property name="relml" value="model/relml/luo_rudy_1991/luo_rudy_1991_RungeKutta.relml"/>
     <property name="relml2" value="model/relml/iyer_mazhari_winslow_2004/iyer_mazhari_winslow_2004_RungeKutta.relml"/>
+    <property name="relml3" value="model/relml/matsuoka_sarai_kuratomi_ono_noma_2003R/matsuoka_sarai_kuratomi_ono_noma_2003R_RungeKutta.relml"/>
+    <property name="initializeFile" value="initialize.txt"/>
+    <property name="relationFile" value="relation.txt"/>
+    <property name="simulationFile" value="simulation.c"/>
 
     <path id="CellMLonGPU.classpath">
         <pathelement location="bin"/>
@@ -19,17 +23,23 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+        <echo message="init done."/>
     </target>
 
     <target name="clean">
         <delete dir="bin"/>
+        <delete file="${initializeFile}"/>
+        <delete file="${relationFile}"/>
+        <delete file="${simulationFile}"/>
+        <echo message="clean done."/>
     </target>
-    <target depends="clean" name="cleanall"/>
+    <target name="cleanall" depends="clean"/>
 
     <target name="compile" depends="init">
-        <javac srcdir="src" destdir="bin">
+        <javac includeAntRuntime="true" srcdir="src" destdir="bin">
             <classpath refid="CellMLonGPU.classpath"/>
         </javac>
+        <echo message="compile done."/>
     </target>
 
     <target name="exec" depends="compile">
@@ -37,5 +47,7 @@
             <arg line="${option} ${type} ${relml}"/>
             <classpath refid="CellMLonGPU.classpath"/>
         </java>
+        <echo message="exec done."/>
+        <echo message="${initializeFile}, ${relationFile}, ${simulationFile} are created."/>
     </target>
 </project>

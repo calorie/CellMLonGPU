@@ -29,7 +29,7 @@ public class CellMLonGPUMain {
     // ========================================================
     private static final String MAIN_VAR_RELATION_FILENAME = "relation.txt";
     private static final String MAIN_VAR_INITIALIZE_FILENAME = "initialize.txt";
-    private static final String MPI_FILENAME = "mpi.c";
+    private static final String SIMULATION_FILENAME = "simulation.c";
 
     /** Default parser name. */
     protected static final String DEFAULT_PARSER_NAME = "org.apache.xerces.parsers.SAXParser";
@@ -226,7 +226,7 @@ public class CellMLonGPUMain {
 
                 PrintWriter out = null;
                 out = new PrintWriter(new BufferedWriter(new FileWriter(srcDir
-                        + MPI_FILENAME)));
+                        + SIMULATION_FILENAME)));
                 out.println(programCode);
                 out.close();
             }
