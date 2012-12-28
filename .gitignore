@@ -3,8 +3,12 @@
 .metadata
 .buildpath
 .settings
-.tags
-.git*
+tags
 .classpath
 *.exe
 *.o
+# build.xml
+initialize.txt
+relation.txt
+mpi.c
+bin/*
